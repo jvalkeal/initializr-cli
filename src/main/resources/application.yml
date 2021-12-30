@@ -1,10 +1,11 @@
 spring:
   main:
     web-application-type: none
+## disable console logging
+logging:
+ pattern:
+   console:
 ## log debug from a cli
-#logging:
-#  pattern:
-#    console:
 #  file:
 #    name: shell.log
 #  level:
