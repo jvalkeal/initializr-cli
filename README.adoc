@@ -87,3 +87,12 @@ OPTIONS
 
 ```
 
+== Demos
+
+Generate project:
+
+image::https://asciinema.org/a/S26zRT1jwdeM4ZGhHihJOB0v0.svg[asciicast,link="https://asciinema.org/a/S26zRT1jwdeM4ZGhHihJOB0v0"]
+
+List dependencies from a server:
+
+image::https://asciinema.org/a/g85jSakIuz3bz9uQcUKNCkA3T.svg[asciicast,link="https://asciinema.org/a/g85jSakIuz3bz9uQcUKNCkA3T"]
