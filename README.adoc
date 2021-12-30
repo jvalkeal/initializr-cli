@@ -1,6 +1,6 @@
 = initializr-cli
 
-Experimental `CLI` for https://github.com/spring-io[initializr] implemented with https://github.com/spring-projects/spring-shell[spring-shell] defaulting to https://start.spring.io[start.spring.io]. Focus of this `CLI` is to make it more user friendly to create a project from a command line and also demonstrate _native_ capabilities with https://github.com/spring-projects-experimental/spring-native[spring-native].
+Experimental `CLI` for https://github.com/spring-io/initializr[initializr] implemented with https://github.com/spring-projects/spring-shell[spring-shell] defaulting to https://start.spring.io[start.spring.io]. Focus of this `CLI` is to make it more user friendly to create a project from a command line and also demonstrate _native_ capabilities with https://github.com/spring-projects-experimental/spring-native[spring-native].
 
 == Build
 
