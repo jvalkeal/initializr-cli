@@ -91,7 +91,7 @@ OPTIONS
 
 Generate project:
 
-image::https://asciinema.org/a/S26zRT1jwdeM4ZGhHihJOB0v0.svg[asciicast,link="https://asciinema.org/a/S26zRT1jwdeM4ZGhHihJOB0v0"]
+image::https://asciinema.org/a/JYxbnmbvEJTF1sFA3o5FGVCJW.svg[asciicast,link="https://asciinema.org/a/JYxbnmbvEJTF1sFA3o5FGVCJW"]
 
 List dependencies from a server:
 
