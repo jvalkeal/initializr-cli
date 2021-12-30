@@ -1,0 +1,11 @@
+spring:
+  main:
+    web-application-type: none
+## log debug from a cli
+#logging:
+#  pattern:
+#    console:
+#  file:
+#    name: shell.log
+#  level:
+#    org.springframework.experimental.initializrcli: debug
