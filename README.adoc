@@ -30,7 +30,8 @@ Which you can then run with:
 
 == Docs
 
-Generic commands:
+=== Generic Commands
+
 ```
 initializr:>help
 AVAILABLE COMMANDS
@@ -51,7 +52,8 @@ Server Commands
         server info: Show the Initializr server being used
 ```
 
-Listing dependencies:
+=== Listing dependencies
+
 ```
 initializr:>help --command "server dependencies"
 
@@ -69,7 +71,8 @@ OPTIONS
 
 ```
 
-Generating a project:
+=== Generating a project
+
 ```
 initializr:>help generate
 
@@ -86,6 +89,70 @@ OPTIONS
 		[Mandatory]
 
 ```
+
+=== Non-Interactive Mode
+
+Currently if you pass any parameters into a shell from startup it enters into non-interactive mode.
+
+With native:
+
+```
+./build/native/nativeCompile/initializr-cli help
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v2.6.2)
+
+AVAILABLE COMMANDS
+
+Built-In Commands
+        clear: Clear the shell screen.
+        exit, quit: Exit the shell.
+        help: Display help about available commands.
+        history: Display or save the history of previously run commands
+        script: Read and execute commands from a file.
+        stacktrace: Display the full stacktrace of the last error.
+
+Generate Commands
+        generate: Generate project
+
+Server Commands
+        server dependencies: List supported dependencies
+        server info: Show the Initializr server being used
+```
+
+With jar:
+
+```
+$ java -jar build/libs/initializr-cli-0.0.1-SNAPSHOT.jar help
+  ___       _ _   _       _ _                    _ _
+ |_ _|_ __ (_) |_(_) __ _| (_)_____ __       ___| (_)
+  | || '_ \| | __| |/ _` | | |_  / '__|____ / __| | |
+  | || | | | | |_| | (_| | | |/ /| | |_____| (__| | |
+ |___|_| |_|_|\__|_|\__,_|_|_/___|_|        \___|_|_|
+
+AVAILABLE COMMANDS
+
+Built-In Commands
+        clear: Clear the shell screen.
+        exit, quit: Exit the shell.
+        help: Display help about available commands.
+        history: Display or save the history of previously run commands
+        script: Read and execute commands from a file.
+        stacktrace: Display the full stacktrace of the last error.
+
+Generate Commands
+        generate: Generate project
+
+Server Commands
+        server dependencies: List supported dependencies
+        server info: Show the Initializr server being used
+```
+
 
 == Demos
 
