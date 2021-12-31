@@ -70,7 +70,7 @@ public class Wizard {
 		writeSingleSelector("Project", projectType);
 
 		String languageType = runSingleSelector(languageSelectorItems, "Language");
-		writeSingleSelector("language", languageType);
+		writeSingleSelector("Language", languageType);
 
 		String bootVersion = runSingleSelector(bootSelectorItems, "Spring Boot");
 		writeSingleSelector("Spring Boot", bootVersion);
