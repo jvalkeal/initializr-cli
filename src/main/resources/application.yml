@@ -3,10 +3,14 @@ spring:
     web-application-type: none
 ## disable console logging
 logging:
- pattern:
-   console:
+  pattern:
+    console:
 ## log debug from a cli
 #  file:
 #    name: shell.log
 #  level:
-#    org.springframework.experimental.initializrcli: debug
+#    org:
+#      springframework:
+#        experimental:
+#          initializrcli: debug
+#        shell: debug
