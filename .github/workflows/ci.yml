@@ -46,3 +46,11 @@ jobs:
           set-java-home: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - run: ./gradlew build nativeCompile --no-daemon
+      - name: Run Commands (linux/macos)
+        run: |
+          ./build/native/nativeCompile/initializr-cli help
+        if: runner.os != 'Windows'
+      - name: Run Commands (windows)
+        run: |
+          ./build/native/nativeCompile/initializr-cli.exe help
+        if: runner.os == 'Windows'
