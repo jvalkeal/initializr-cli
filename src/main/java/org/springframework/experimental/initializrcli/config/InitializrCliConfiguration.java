@@ -15,16 +15,28 @@
  */
 package org.springframework.experimental.initializrcli.config;
 
+import java.time.Duration;
+
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.experimental.initializrcli.support.InitializeConnectionApplicationRunner;
 import org.springframework.experimental.initializrcli.support.TargetHolder;
+import org.springframework.http.client.reactive.ReactorResourceFactory;
 
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(InitializrCliProperties.class)
-public class InitializrCliAutoConfiguration {
+public class InitializrCliConfiguration {
+
+    @Bean
+    public ReactorResourceFactory reactorClientResourceFactory() {
+		// to change default 2s quiet period so that
+		// context terminates more quick
+        ReactorResourceFactory factory = new ReactorResourceFactory();
+        factory.setShutdownQuietPeriod(Duration.ZERO);
+        return factory;
+    }
 
     @Bean
     public ApplicationRunner initializeConnectionApplicationRunner(TargetHolder targetHolder,

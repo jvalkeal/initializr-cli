@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.experimental.initializrcli.client.InitializrClient;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
 public class TargetHolder implements ApplicationEventPublisherAware {
@@ -28,7 +29,10 @@ public class TargetHolder implements ApplicationEventPublisherAware {
 
 	private ApplicationEventPublisher applicationEventPublisher;
 
-	public TargetHolder() {
+	private WebClient.Builder webClientBuilder;
+
+	public TargetHolder(WebClient.Builder webClientBuilder) {
+		this.webClientBuilder = webClientBuilder;
 	}
 
 	@Override
@@ -49,7 +53,7 @@ public class TargetHolder implements ApplicationEventPublisherAware {
 	private void attemptConnection() {
 		InitializrClient client = null;
 		try {
-			InitializrClient c = InitializrClient.builder().target(target.getBaseUrl()).build();
+			InitializrClient c = InitializrClient.builder(webClientBuilder).target(target.getBaseUrl()).build();
 			c.connect();
 			client = c;
 		}

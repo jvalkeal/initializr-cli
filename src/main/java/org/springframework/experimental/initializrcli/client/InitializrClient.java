@@ -88,15 +88,21 @@ public interface InitializrClient {
 	/**
 	 * Gets a new builder instance for initializr client.
 	 *
+	 * @param webClientBuilder the webclient builder
 	 * @return the builder for initializr client
 	 */
-	public static Builder builder() {
-		return new DefaultBuilder();
+	public static Builder builder(WebClient.Builder webClientBuilder) {
+		return new DefaultBuilder(webClientBuilder);
 	}
 
 	public static class DefaultBuilder implements Builder {
 
 		private String baseUrl;
+		private WebClient.Builder webClientBuilder;
+
+		DefaultBuilder(WebClient.Builder webClientBuilder) {
+			this.webClientBuilder = webClientBuilder;
+		}
 
 		public Builder target(String baseUrl) {
 			this.baseUrl = baseUrl;
@@ -104,7 +110,9 @@ public interface InitializrClient {
 		}
 
 		public InitializrClient build() {
-			WebClient client = WebClient.builder().baseUrl(this.baseUrl).build();
+			WebClient client = webClientBuilder
+					.baseUrl(this.baseUrl)
+					.build();
 			return new DefaultInitializrClient(client, this.baseUrl);
 		}
 	}
