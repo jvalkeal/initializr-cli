@@ -20,5 +20,5 @@ jobs:
         with:
           distribution: adopt
           java-version: ${{ matrix.java }}
-          cache: maven
+          cache: gradle
       - run: ./gradlew build
