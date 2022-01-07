@@ -1,6 +1,11 @@
 spring:
   main:
     web-application-type: none
+    banner-mode: off
+  shell:
+    command:
+      completion:
+        root-command: initializr-cli
 ## disable console logging
 logging:
   pattern:
