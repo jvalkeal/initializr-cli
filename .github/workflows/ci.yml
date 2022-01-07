@@ -26,6 +26,7 @@ jobs:
     needs: [build]
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         version: ['21.3.0']
         os: [macos-latest, windows-latest, ubuntu-latest]
