@@ -52,5 +52,5 @@ jobs:
         if: runner.os != 'Windows'
       - name: Run Commands (windows)
         run: |
-          ./build/native/nativeCompile/initializr-cli.exe help
+          build\native\nativeCompile\initializr-cli.exe help
         if: runner.os == 'Windows'
