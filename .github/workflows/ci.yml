@@ -21,7 +21,7 @@ jobs:
           distribution: adopt
           java-version: ${{ matrix.java }}
           cache: gradle
-      - run: ./gradlew build
+      - run: ./gradlew build --no-daemon
   native:
     needs: [build]
     runs-on: ${{ matrix.os }}
@@ -45,4 +45,4 @@ jobs:
           components: native-image
           set-java-home: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - run: ./gradlew build nativeCompile
+      - run: ./gradlew build nativeCompile --no-daemon
