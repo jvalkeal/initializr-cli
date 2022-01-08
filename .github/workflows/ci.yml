@@ -48,7 +48,7 @@ jobs:
       - run: ./gradlew build nativeCompile --no-daemon
       - uses: actions/upload-artifact@v2
         with:
-          name: helloworld-${{ matrix.os }}-${{ matrix.version }}
+          name: initializr-cli-${{ matrix.os }}-${{ matrix.version }}
           path: build/native/nativeCompile/
           retention-days: 1
       - name: Run Commands (linux/macos)
