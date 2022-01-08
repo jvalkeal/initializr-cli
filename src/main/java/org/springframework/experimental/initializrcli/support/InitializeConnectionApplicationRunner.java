@@ -19,9 +19,9 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.experimental.initializrcli.config.InitializrCliProperties;
-import org.springframework.shell.jline.InteractiveShellApplicationRunner;
+import org.springframework.shell.jline.InteractiveShellRunner;
 
-@Order(InteractiveShellApplicationRunner.PRECEDENCE - 10)
+@Order(InteractiveShellRunner.PRECEDENCE - 10)
 public class InitializeConnectionApplicationRunner implements ApplicationRunner {
 
 	private TargetHolder targetHolder;
