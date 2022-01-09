@@ -17,7 +17,10 @@ package org.springframework.experimental.initializrcli.config;
 
 import java.time.Duration;
 
+import io.netty.resolver.DefaultAddressResolverGroup;
+
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.web.reactive.function.client.ReactorNettyHttpClientMapper;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +40,13 @@ public class InitializrCliConfiguration {
         factory.setShutdownQuietPeriod(Duration.ZERO);
         return factory;
     }
+
+	@Bean
+	ReactorNettyHttpClientMapper reactorNettyHttpClientMapper() {
+        // workaround for native/graal issue
+        // https://github.com/spring-projects-experimental/spring-native/issues/1319
+		return httpClient -> httpClient.resolver(DefaultAddressResolverGroup.INSTANCE);
+	}
 
     @Bean
     public ApplicationRunner initializeConnectionApplicationRunner(TargetHolder targetHolder,
