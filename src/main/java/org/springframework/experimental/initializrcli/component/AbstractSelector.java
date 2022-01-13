@@ -43,10 +43,6 @@ public abstract class AbstractSelector<T extends Nameable & Matchable, S> {
 	private final KeyMap<Operation> keyMap = new KeyMap<>();
 	private final List<T> items;
 	private List<ItemState<T>> itemStates;
-	private final static Character[] chars = new Character[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
-			'l',
-			'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6',
-			'7', '8', '9' };
 	private boolean exitSelects;
 	private Comparator<T> comparator = (o1, o2) -> 0;
 
@@ -222,8 +218,9 @@ public abstract class AbstractSelector<T extends Nameable & Matchable, S> {
 		map.bind(Operation.UP, ctrl('Y'), key(terminal, Capability.key_up));
 		map.bind(Operation.EXIT, "\r");
 		map.bind(Operation.BACKSPACE, del());
-		for (Character character : chars) {
-			map.bind(Operation.CHAR, character.toString());
+		// skip 32 - SPACE, 127 - DEL
+		for (char i = 33; i < KeyMap.KEYMAP_LENGTH - 1; i++) {
+			map.bind(Operation.CHAR, Character.toString(i));
 		}
 	}
 

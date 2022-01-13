@@ -43,10 +43,6 @@ public class FieldInput {
 	private final Terminal terminal;
 	private final BindingReader bindingReader;
 	private final KeyMap<Operation> keyMap = new KeyMap<>();
-	private final static Character[] chars = new Character[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
-			'l',
-			'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6',
-			'7', '8', '9', '.', '-' };
 	private StringBuilder searchBuf = new StringBuilder();
 	private String name;
 	private String defaultValue;
@@ -140,8 +136,9 @@ public class FieldInput {
 	private void defaultBindKeys(KeyMap<Operation> map) {
 		map.bind(Operation.EXIT, "\r");
 		map.bind(Operation.BACKSPACE, del());
-		for (Character character : chars) {
-			map.bind(Operation.CHAR, character.toString());
+		// skip 127 - DEL
+		for (char i = 32; i < KeyMap.KEYMAP_LENGTH - 1; i++) {
+			map.bind(Operation.CHAR, Character.toString(i));
 		}
 	}
 
