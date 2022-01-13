@@ -16,6 +16,7 @@
 package org.springframework.experimental.initializrcli.component;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -47,13 +48,17 @@ public abstract class AbstractSelector<T extends Nameable & Matchable, S> {
 			'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6',
 			'7', '8', '9' };
 	private boolean exitSelects;
+	private Comparator<T> comparator = (o1, o2) -> 0;
 
-	public AbstractSelector(Terminal terminal, List<T> items, boolean exitSelects) {
+	public AbstractSelector(Terminal terminal, List<T> items, boolean exitSelects, Comparator<T> comparator) {
 		Assert.notNull(terminal, "terminal must be set");
 		this.terminal = terminal;
 		this.items = items;
 		this.exitSelects = exitSelects;
 		this.bindingReader = new BindingReader(terminal.reader());
+		if (comparator != null) {
+			this.comparator = comparator;
+		}
 		init();
 	}
 
@@ -70,11 +75,13 @@ public abstract class AbstractSelector<T extends Nameable & Matchable, S> {
 
 	private void buildStates() {
 		AtomicInteger index = new AtomicInteger(0);
-		this.itemStates = items.stream().map(item -> ItemState.of(item, item.getName(), index.getAndIncrement()))
+		this.itemStates = items.stream()
+				.sorted(comparator)
+				.map(item -> ItemState.of(item, item.getName(), index.getAndIncrement()))
 				.collect(Collectors.toList());
 	}
 
-	private ItemStateViewProjection buildItemStateView2(int skip) {
+	private ItemStateViewProjection buildItemStateView(int skip) {
 		AtomicInteger reindex = new AtomicInteger(0);
 		List<ItemState<T>> filtered = this.itemStates.stream()
 			.filter(i -> {
@@ -125,9 +132,9 @@ public abstract class AbstractSelector<T extends Nameable & Matchable, S> {
 					stale = false;
 				}
 				display.resize(size.getRows(), size.getColumns());
-				ItemStateViewProjection buildItemStateView = buildItemStateView2(start.get());
+				ItemStateViewProjection buildItemStateView = buildItemStateView(start.get());
 				List<ItemState<T>> itemStateView = buildItemStateView.items;
-				display.update(displayLines(start.get() + pos.get(), itemStateView), 0);
+				display.update(render(start.get() + pos.get(), itemStateView), 0);
 				Operation operation = bindingReader.readBinding(keyMap);
 				switch (operation) {
 					case SELECT:
@@ -220,13 +227,13 @@ public abstract class AbstractSelector<T extends Nameable & Matchable, S> {
 		}
 	}
 
-	abstract List<AttributedString> displayLines(int cursorRow, List<ItemState<T>> itemStateView);
+	abstract List<AttributedString> render(int cursorRow, List<ItemState<T>> itemStateView);
 
 	protected enum Operation {
 		SELECT, UP, DOWN, EXIT, CHAR, BACKSPACE;
 	}
 
-	protected static class ItemState<T extends Matchable> implements Matchable {
+	public static class ItemState<T extends Matchable> implements Matchable {
 		T item;
 		String name;
 		boolean selected;
@@ -242,9 +249,20 @@ public abstract class AbstractSelector<T extends Nameable & Matchable, S> {
 			return item.matches(match);
 		};
 
+		public int getIndex() {
+			return index;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public boolean isSelected() {
+			return selected;
+		}
+
 		static <T extends Matchable> ItemState<T> of(T item, String name, int index) {
 			return new ItemState<T>(item, name, index);
 		}
 	}
-
 }

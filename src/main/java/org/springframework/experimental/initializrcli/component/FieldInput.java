@@ -15,9 +15,10 @@
  */
 package org.springframework.experimental.initializrcli.component;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import org.jline.keymap.BindingReader;
 import org.jline.keymap.KeyMap;
@@ -26,12 +27,12 @@ import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStringBuilder;
-import org.jline.utils.AttributedStyle;
 import org.jline.utils.Display;
 import org.jline.utils.InfoCmp.Capability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import static org.jline.keymap.KeyMap.del;
@@ -49,6 +50,7 @@ public class FieldInput {
 	private StringBuilder searchBuf = new StringBuilder();
 	private String name;
 	private String defaultValue;
+	private Function<FieldInputContext, List<AttributedString>> renderer = new DefaultDisplay();
 
 	public FieldInput(Terminal terminal, String name, String defaultValue) {
 		this.terminal = terminal;
@@ -62,6 +64,32 @@ public class FieldInput {
 		bindKeys(keyMap);
 	}
 
+	/**
+	 * Sets a display renderer.
+	 *
+	 * @param renderer the display renderer function
+	 */
+	public void setRenderer(Function<FieldInputContext, List<AttributedString>> renderer) {
+		Assert.notNull(renderer, "renderer cannot be null");
+		this.renderer = renderer;
+	}
+
+	/**
+	 * Render to be shows content of a display with set display renderer using a
+	 * given context.
+	 *
+	 * @param context the field input context
+	 * @return list of attributed strings
+	 */
+	public List<AttributedString> render(FieldInputContext context) {
+		return renderer.apply(context);
+	}
+
+	/**
+	 * Run a component feature and return result.
+	 *
+	 * @return result from a component run
+	 */
 	public String run() {
 		Display display = new Display(terminal, false);
 		Attributes attr = terminal.enterRawMode();
@@ -77,7 +105,7 @@ public class FieldInput {
 
 			while (true) {
 				display.resize(size.getRows(), size.getColumns());
-				display.update(displayLine(), 0);
+				display.update(render(FieldInputContext.ofRunning(name, defaultValue, searchBuf.toString())), 0);
 				Operation operation = bindingReader.readBinding(keyMap);
 
 				switch (operation) {
@@ -105,25 +133,6 @@ public class FieldInput {
 		}
 	}
 
-	private List<AttributedString> displayLine() {
-		List<AttributedString> out = new ArrayList<>();
-		AttributedStringBuilder builder = new AttributedStringBuilder();
-		builder.append("?", AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.GREEN).bold());
-		builder.append(" ");
-		builder.append(name, AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.WHITE).bold());
-		builder.append(" ");
-		String value = searchBuf.toString();
-		if (StringUtils.hasText(value)) {
-			builder.append(value);
-		}
-		else {
-			builder.append("[Default " + defaultValue + "]",
-					AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
-		}
-		out.add(builder.toAttributedString());
-		return out;
-	}
-
 	protected void bindKeys(KeyMap<Operation> map) {
 		defaultBindKeys(map);
 	}
@@ -138,6 +147,90 @@ public class FieldInput {
 
 	protected enum Operation {
 		EXIT, CHAR, BACKSPACE;
+	}
+
+	public interface FieldInputContext {
+		boolean isResult();
+		String getName();
+		String getValue();
+		String getDefaultValue();
+		String getFilter();
+
+		public static FieldInputContext ofResult(String name, String value) {
+			return new DefaultFieldInputContext(true, name, value, null, null);
+		}
+
+		public static FieldInputContext ofRunning(String name, String defaultValue, String filter) {
+			return new DefaultFieldInputContext(false, name, null, defaultValue, filter);
+		}
+
+		static class DefaultFieldInputContext implements FieldInputContext {
+			private final boolean result;
+			private final String name;
+			private final String value;
+			private final String defaultValue;
+			private final String filter;
+
+			public DefaultFieldInputContext(boolean result, String name, String value, String defaultValue,
+					String filter) {
+				this.result = result;
+				this.name = name;
+				this.value = value;
+				this.defaultValue = defaultValue;
+				this.filter = filter;
+			}
+
+			@Override
+			public boolean isResult() {
+				return result;
+			}
+
+			@Override
+			public String getName() {
+				return name;
+			}
+
+			@Override
+			public String getValue() {
+				return value;
+			}
+
+			@Override
+			public String getDefaultValue() {
+				return defaultValue;
+			}
+
+			@Override
+			public String getFilter() {
+				return filter;
+			}
+		}
+	}
+
+	private static class DefaultDisplay implements Function<FieldInputContext, List<AttributedString>> {
+
+		@Override
+		public List<AttributedString> apply(FieldInputContext context) {
+
+			AttributedStringBuilder builder = new AttributedStringBuilder();
+			builder.append(context.getName());
+			builder.append(" ");
+
+			if (context.isResult()) {
+				builder.append(context.getValue());
+			}
+			else  {
+				String filter = context.getFilter();
+				if (StringUtils.hasText(filter)) {
+					builder.append(filter);
+				}
+				else {
+					builder.append("[Default " + context.getDefaultValue() + "]");
+				}
+			}
+
+			return Arrays.asList(builder.toAttributedString());
+		}
 	}
 
 }
