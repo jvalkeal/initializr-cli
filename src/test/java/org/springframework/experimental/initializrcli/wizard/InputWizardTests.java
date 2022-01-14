@@ -26,11 +26,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
+import org.springframework.experimental.initializrcli.AbstractShellTests;
 import org.springframework.experimental.initializrcli.wizard.InputWizard.InputWizardResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class InputWizardTests extends AbstractWizardTests {
+public class InputWizardTests extends AbstractShellTests {
 
 	@Test
 	@Timeout(value = 10, unit = TimeUnit.SECONDS)
@@ -78,6 +79,6 @@ public class InputWizardTests extends AbstractWizardTests {
 		assertThat(inputWizardResult).isNotNull();
 		assertThat(inputWizardResult.textInputs()).containsEntry("field1", "defaultField1Value");
 		assertThat(inputWizardResult.singleInputs()).containsEntry("single1", "value1");
-		assertThat(inputWizardResult.multiInputs().get("multi1")).containsExactlyInAnyOrder("value1");
+		assertThat(inputWizardResult.multiInputs().get("multi1")).containsExactlyInAnyOrder("value2");
 	}
 }

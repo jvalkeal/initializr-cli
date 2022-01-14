@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.experimental.initializrcli.wizard;
+package org.springframework.experimental.initializrcli;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PipedInputStream;
@@ -31,7 +31,7 @@ import org.jline.utils.AttributedString;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-public abstract class AbstractWizardTests {
+public abstract class AbstractShellTests {
 
     private ExecutorService executorService;
     private PipedInputStream pipedInputStream;
@@ -117,7 +117,7 @@ public abstract class AbstractWizardTests {
         }
 
         public TestBuffer ctrlE() {
-            return ctrl('R');
+            return ctrl('E');
         }
 
         public TestBuffer ctrlY() {
