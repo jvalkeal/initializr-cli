@@ -18,7 +18,8 @@ repositories {
 
 ext {
 	set('springShellVersion', '3.0.0-SNAPSHOT')
-	set('jarchivelib', '1.2.0')
+	set('jarchivelibVersion', '1.2.0')
+	set('initializrVersion', '0.11.1')
 }
 
 configurations.all {
@@ -29,13 +30,17 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.shell:spring-shell-starter'
 	implementation 'org.rauschig:jarchivelib'
+	implementation 'io.spring.initializr:initializr-generator'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 dependencyManagement {
 	dependencies {
 		dependency "org.springframework.shell:spring-shell-starter:${springShellVersion}"
-		dependency "org.rauschig:jarchivelib:${jarchivelib}"
+		dependency "org.rauschig:jarchivelib:${jarchivelibVersion}"
+	}
+	imports {
+		mavenBom "io.spring.initializr:initializr-bom:${initializrVersion}"
 	}
 }
 

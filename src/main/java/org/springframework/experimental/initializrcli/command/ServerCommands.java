@@ -15,8 +15,14 @@
  */
 package org.springframework.experimental.initializrcli.command;
 
+import java.util.Collections;
 import java.util.stream.Stream;
 
+import io.spring.initializr.generator.version.Version;
+import io.spring.initializr.generator.version.VersionParser;
+import io.spring.initializr.generator.version.VersionRange;
+
+import org.springframework.experimental.initializrcli.client.model.Dependency;
 import org.springframework.experimental.initializrcli.client.model.Metadata;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -31,6 +37,8 @@ import org.springframework.util.StringUtils;
 @ShellComponent
 public class ServerCommands extends AbstractInitializrCommands {
 
+	private final static VersionParser VERSION_PARSER_INSTANCE = new VersionParser(Collections.emptyList());
+
 	@ShellMethod(key = "server info", value = "Show the Initializr server being used")
 	public String info() {
 		return client.info();
@@ -38,13 +46,15 @@ public class ServerCommands extends AbstractInitializrCommands {
 
 	@ShellMethod(key = "server dependencies", value = "List supported dependencies")
 	public Table dependencies(
-		@ShellOption(help = "Search string to limit results", defaultValue = ShellOption.NULL) String search
+		@ShellOption(help = "Search string to limit results", defaultValue = ShellOption.NULL) String search,
+		@ShellOption(help = "Limit to compatibility version", defaultValue = ShellOption.NULL) String version
 	) {
 		Metadata metadata = client.getMetadata();
 
 		Stream<String[]> header = Stream.<String[]>of(new String[] { "Id", "Name", "Description", "Required version" });
 		Stream<String[]> rows = metadata.getDependencies().getValues().stream()
 				.flatMap(dc -> dc.getValues().stream())
+				.filter(d -> compatible(version, d))
 				.map(d -> new String[] { d.getId(), d.getName(), d.getDescription(), d.getVersionRange() })
 				.filter(d -> matches(d, search));
 		String[][] data = Stream.concat(header, rows).toArray(String[][]::new);
@@ -65,5 +75,14 @@ public class ServerCommands extends AbstractInitializrCommands {
 			}
 		}
 		return false;
+	}
+
+	private static boolean compatible(String version, Dependency dependency) {
+		if (!StringUtils.hasText(version) || !StringUtils.hasText(dependency.getVersionRange())) {
+			return true;
+		}
+		Version parsedVersion = VERSION_PARSER_INSTANCE.parse(version);
+		VersionRange parsedRange = VERSION_PARSER_INSTANCE.parseRange(dependency.getVersionRange());
+		return parsedRange.match(parsedVersion);
 	}
 }
