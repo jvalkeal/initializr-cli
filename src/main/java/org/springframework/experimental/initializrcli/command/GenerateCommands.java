@@ -27,12 +27,16 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import io.spring.initializr.generator.version.Version;
+import io.spring.initializr.generator.version.VersionParser;
+import io.spring.initializr.generator.version.VersionRange;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 
+import org.springframework.experimental.initializrcli.client.model.Dependency;
 import org.springframework.experimental.initializrcli.client.model.Metadata;
 import org.springframework.experimental.initializrcli.component.Matchable;
 import org.springframework.experimental.initializrcli.component.Nameable;
@@ -42,6 +46,7 @@ import org.springframework.experimental.initializrcli.component.DefaultSingleIte
 import org.springframework.experimental.initializrcli.component.FieldInput.FieldInputContext;
 import org.springframework.experimental.initializrcli.wizard.InputWizard;
 import org.springframework.experimental.initializrcli.wizard.InputWizard.InputWizardResult;
+import org.springframework.experimental.initializrcli.wizard.InputWizard.SelectItem;
 import org.springframework.experimental.initializrcli.wizard.Wizard;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -81,6 +86,21 @@ public class GenerateCommands extends AbstractInitializrCommands {
 	private final static StyledSingleItemSelectorRenderer<SelectorItem<String>> SINGLE_ITEM_SELECTOR_RENDERER = new StyledSingleItemSelectorRenderer<>();
 	private final static StyledMultiItemSelectorRenderer<SelectorItem<String>> MULTI_ITEM_SELECTOR_RENDERER = new StyledMultiItemSelectorRenderer<>();
 
+	private final static VersionParser VERSION_PARSER_INSTANCE = new VersionParser(Collections.emptyList());
+
+	private final static Comparator<SelectorItem<String>> NAME_COMPARATOR = (o1, o2) -> {
+		return o1.getName().compareTo(o2.getName());
+	};
+	private final static Comparator<SelectorItem<String>> JAVA_VERSION_COMPARATOR = (o1, o2) -> {
+		try {
+			Integer oo1 = Integer.valueOf(o1.getName());
+			Integer oo2 = Integer.valueOf(o2.getName());
+			return oo1.compareTo(oo2);
+		} catch (Exception e) {
+		}
+		return NAME_COMPARATOR.compare(o1, o2);
+	};
+
 	@ShellMethod(key = "init", value = "Initialize project")
 	public String init(
 		@ShellOption(help = "Path to extract") String path,
@@ -99,6 +119,9 @@ public class GenerateCommands extends AbstractInitializrCommands {
 	) {
 		Metadata metadata = client.getMetadata();
 
+		// Need to run wizard in two steps as for dependencies we need a boot version
+		// able to define which deps are available and thus can be selected.
+
 		Map<String, String> projectSelectItems = metadata.getType().getValues().stream()
 				.filter(v -> ObjectUtils.nullSafeEquals(v.getTags().get("format"), "project"))
 				.collect(Collectors.toMap(v -> v.getName(), v -> v.getId()));
@@ -113,48 +136,28 @@ public class GenerateCommands extends AbstractInitializrCommands {
 		String defaultDescription = metadata.getDescription().getDefault();
 		String defaultPackageName = metadata.getPackageName().getDefault();
 		dependencies = dependencies == null ? Collections.emptyList() : dependencies;
-		Map<String, String> dependenciesSelectItems = metadata.getDependencies().getValues().stream()
-				.flatMap(dc -> dc.getValues().stream())
-				.collect(Collectors.toMap(dc -> dc.getName(), dc -> dc.getId()));
-		Map<String, String> packagingSelectItems = metadata.getPackaging().getValues().stream()
-				.collect(Collectors.toMap(v -> v.getName(), v -> v.getId()));
-		Map<String, String> javaVersionSelectItems = metadata.getJavaVersion().getValues().stream()
-				.collect(Collectors.toMap(v -> v.getName(), v -> v.getId()));
 
-		Comparator<SelectorItem<String>> nameComparator = (o1, o2) -> {
-			return o1.getName().compareTo(o2.getName());
-		};
-
-		Comparator<SelectorItem<String>> javaVersionComparator = (o1, o2) -> {
-			try {
-				Integer oo1 = Integer.valueOf(o1.getName());
-				Integer oo2 = Integer.valueOf(o2.getName());
-				return oo1.compareTo(oo2);
-			} catch (Exception e) {
-			}
-			return nameComparator.compare(o1, o2);
-		};
-
-		Wizard<InputWizardResult> wizard = InputWizard.builder(getTerminal())
+		// wizard before deps
+		Wizard<InputWizardResult> wizard1 = InputWizard.builder(getTerminal())
 				.withSingleInput(PROJECT_ID)
 					.name(PROJECT_NAME)
 					.currentValue(project)
 					.selectItems(projectSelectItems)
-					.sort(nameComparator)
+					.sort(NAME_COMPARATOR)
 					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
 					.and()
 				.withSingleInput(LANGUAGE_ID)
 					.name(LANGUAGE_NAME)
 					.currentValue(language)
 					.selectItems(languageSelectItems)
-					.sort(nameComparator)
+					.sort(NAME_COMPARATOR)
 					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
 					.and()
 				.withSingleInput(BOOT_VERSION_ID)
 					.name(BOOT_VERSION_NAME)
 					.currentValue(bootVersion)
 					.selectItems(bootSelectItems)
-					.sort(nameComparator.reversed())
+					.sort(NAME_COMPARATOR.reversed())
 					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
 					.and()
 				.withTextInput(VERSION_ID)
@@ -193,30 +196,47 @@ public class GenerateCommands extends AbstractInitializrCommands {
 					.currentValue(packageName)
 					.renderer(FIELD_INPUT_RENDERER)
 					.and()
+				.build();
+
+		InputWizardResult result1 = wizard1.run();
+
+		Map<String, String> packagingSelectItems = metadata.getPackaging().getValues().stream()
+				.collect(Collectors.toMap(v -> v.getName(), v -> v.getId()));
+		Map<String, String> javaVersionSelectItems = metadata.getJavaVersion().getValues().stream()
+				.collect(Collectors.toMap(v -> v.getName(), v -> v.getId()));
+		List<SelectItem> dependenciesSelectItems = metadata.getDependencies().getValues().stream()
+				.flatMap(dc -> dc.getValues().stream())
+				.map(dep -> SelectItem.of(dep.getName(), dep.getId(), compatible(result1.singleInputs().get(BOOT_VERSION_ID), dep)))
+				.collect(Collectors.toList());
+
+		// wizard from deps
+		Wizard<InputWizardResult> wizard2 = InputWizard.builder(getTerminal())
 				.withMultiInput(DEPENDENCIES_ID)
 					.name(DEPENDENCIES_NAME)
 					.currentValue(dependencies)
 					.selectItems(dependenciesSelectItems)
-					.sort(nameComparator)
+					.sort(NAME_COMPARATOR)
 					.renderer(MULTI_ITEM_SELECTOR_RENDERER)
 					.and()
 				.withSingleInput(PACKAGING_ID)
 					.name(PACKAGING_NAME)
 					.currentValue(packaging)
 					.selectItems(packagingSelectItems)
-					.sort(nameComparator)
+					.sort(NAME_COMPARATOR)
 					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
 					.and()
 				.withSingleInput(JAVA_VERSION_ID)
 					.name(JAVA_VERSION_NAME)
 					.currentValue(javaVersion)
 					.selectItems(javaVersionSelectItems)
-					.sort(javaVersionComparator)
+					.sort(JAVA_VERSION_COMPARATOR)
 					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
 					.and()
 				.build();
 
-		InputWizardResult result = wizard.run();
+		InputWizardResult result2 = wizard2.run();
+
+		InputWizardResult result = InputWizardResult.merge(result1, result2);
 
 		Path generated = client.generate(result.singleInputs().get(PROJECT_ID),
 				result.singleInputs().get(LANGUAGE_ID),
@@ -244,6 +264,15 @@ public class GenerateCommands extends AbstractInitializrCommands {
 					generated.toFile().getAbsolutePath(), outFile.getAbsolutePath()), e);
 		}
 		return String.format("Extracted to %s", outFile.getAbsolutePath());
+	}
+
+	private static boolean compatible(String version, Dependency dependency) {
+		if (!StringUtils.hasText(version) || !StringUtils.hasText(dependency.getVersionRange())) {
+			return true;
+		}
+		Version parsedVersion = VERSION_PARSER_INSTANCE.parse(version);
+		VersionRange parsedRange = VERSION_PARSER_INSTANCE.parseRange(dependency.getVersionRange());
+		return parsedRange.match(parsedVersion);
 	}
 
 	private static class StyledFieldInputRenderer implements Function<FieldInputContext, List<AttributedString>> {
@@ -343,9 +372,9 @@ public class GenerateCommands extends AbstractInitializrCommands {
 						builder.append("[x]", AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN));
 					}
 					else {
-						builder.append("[ ]", AttributedStyle.DEFAULT.bold());
+						builder.append("[ ]", e.isEnabled() ? AttributedStyle.DEFAULT.bold() : AttributedStyle.DEFAULT.faint());
 					}
-					builder.append(" " + e.getName());
+					builder.append(" " + e.getName(), e.isEnabled() ? AttributedStyle.DEFAULT : AttributedStyle.DEFAULT.faint());
 					out.add(builder.toAttributedString());
 				});
 			}

@@ -36,7 +36,7 @@ import static org.jline.keymap.KeyMap.ctrl;
 import static org.jline.keymap.KeyMap.del;
 import static org.jline.keymap.KeyMap.key;
 
-public abstract class AbstractSelector<T extends Nameable & Matchable, S> {
+public abstract class AbstractSelector<T extends Nameable & Matchable & Enableable, S> {
 
 	private final Terminal terminal;
 	private final BindingReader bindingReader;
@@ -73,7 +73,7 @@ public abstract class AbstractSelector<T extends Nameable & Matchable, S> {
 		AtomicInteger index = new AtomicInteger(0);
 		this.itemStates = items.stream()
 				.sorted(comparator)
-				.map(item -> ItemState.of(item, item.getName(), index.getAndIncrement()))
+				.map(item -> ItemState.of(item, item.getName(), index.getAndIncrement(), item.isEnabled()))
 				.collect(Collectors.toList());
 	}
 
@@ -136,7 +136,7 @@ public abstract class AbstractSelector<T extends Nameable & Matchable, S> {
 					case SELECT:
 						if (!exitSelects) {
 							itemStateView.forEach(i -> {
-								if (i.index == start.get() + pos.get()) {
+								if (i.index == start.get() + pos.get() && i.enabled) {
 									i.selected = !i.selected;
 								}
 							});
@@ -234,12 +234,14 @@ public abstract class AbstractSelector<T extends Nameable & Matchable, S> {
 		T item;
 		String name;
 		boolean selected;
+		boolean enabled;
 		int index;
 
-		ItemState(T item, String name, int index) {
+		ItemState(T item, String name, int index, boolean enabled) {
 			this.item = item;
 			this.name = name;
 			this.index = index;
+			this.enabled = enabled;
 		}
 
 		public boolean matches(String match) {
@@ -258,8 +260,12 @@ public abstract class AbstractSelector<T extends Nameable & Matchable, S> {
 			return selected;
 		}
 
-		static <T extends Matchable> ItemState<T> of(T item, String name, int index) {
-			return new ItemState<T>(item, name, index);
+		public boolean isEnabled() {
+			return enabled;
+		}
+
+		static <T extends Matchable> ItemState<T> of(T item, String name, int index, boolean enabled) {
+			return new ItemState<T>(item, name, index, enabled);
 		}
 	}
 }

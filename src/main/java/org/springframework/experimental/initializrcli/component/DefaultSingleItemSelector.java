@@ -28,7 +28,7 @@ import org.jline.utils.AttributedStringBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-public class DefaultSingleItemSelector<T extends Nameable & Matchable>
+public class DefaultSingleItemSelector<T extends Nameable & Matchable & Enableable>
 		extends AbstractSelector<T, Optional<T>> {
 
 	private String name;

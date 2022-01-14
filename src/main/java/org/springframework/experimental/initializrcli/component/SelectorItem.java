@@ -17,21 +17,31 @@ package org.springframework.experimental.initializrcli.component;
 
 import org.springframework.util.StringUtils;
 
-public interface SelectorItem<T> extends Nameable, Matchable {
+public interface SelectorItem<T> extends Nameable, Matchable, Enableable {
 
 	T getItem();
 
 	static <T> SelectorItem<T> of(String name, T item) {
-		return new SelectorItemWrapper<T>(name, item);
+		return of(name, item, true);
+	}
+
+	static <T> SelectorItem<T> of(String name, T item, boolean enabled) {
+		return new SelectorItemWrapper<T>(name, item, enabled);
 	}
 
 	public static class SelectorItemWrapper<T> implements SelectorItem<T> {
 		private String name;
+		private boolean enabled;
 		private T item;
 
 		public SelectorItemWrapper(String name, T item) {
+			this(name, item, true);
+		}
+
+		public SelectorItemWrapper(String name, T item, boolean enabled) {
 			this.name = name;
 			this.item = item;
+			this.enabled = enabled;
 		}
 
 		@Override
@@ -45,6 +55,11 @@ public interface SelectorItem<T> extends Nameable, Matchable {
 				return true;
 			};
 			return name.toLowerCase().contains(match.toLowerCase());
+		}
+
+		@Override
+		public boolean isEnabled() {
+			return enabled;
 		}
 
 		public T getItem() {

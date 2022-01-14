@@ -27,7 +27,7 @@ import org.jline.utils.AttributedStringBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-public class DefaultMultiItemSelector<T extends Nameable & Matchable>
+public class DefaultMultiItemSelector<T extends Nameable & Matchable & Enableable>
 		extends AbstractSelector<T, List<T>> {
 
 	private String name;
@@ -166,7 +166,12 @@ public class DefaultMultiItemSelector<T extends Nameable & Matchable>
 						builder.append("[x]");
 					}
 					else {
-						builder.append("[ ]");
+						if (e.enabled) {
+							builder.append("[ ]");
+						}
+						else {
+							builder.append("   ");
+						}
 					}
 					builder.append(" " + e.name);
 					out.add(builder.toAttributedString());

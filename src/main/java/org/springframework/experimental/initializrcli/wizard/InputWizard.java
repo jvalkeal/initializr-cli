@@ -94,6 +94,24 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 		 * @return multi input results
 		 */
 		Map<String, List<String>> multiInputs();
+
+		/**
+		 * Merge input wizard results.
+		 *
+		 * @param left left side results
+		 * @param right right side results
+		 * @return merged results
+		 */
+		public static InputWizardResult merge(InputWizardResult left, InputWizardResult right) {
+			DefaultInputWizardResult inputWizardResult = new DefaultInputWizardResult();
+			inputWizardResult.textInputs.putAll(left.textInputs());
+			inputWizardResult.textInputs.putAll(right.textInputs());
+			inputWizardResult.singleInputs.putAll(left.singleInputs());
+			inputWizardResult.singleInputs.putAll(right.singleInputs());
+			inputWizardResult.multiInputs.putAll(left.multiInputs());
+			inputWizardResult.multiInputs.putAll(right.multiInputs());
+			return inputWizardResult;
+		}
 	}
 
 	/**
@@ -225,21 +243,12 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 		MultiInputSpec currentValue(List<String> currentValues);
 
 		/**
-		 * Adds a select item.
-		 *
-		 * @param name the name
-		 * @param item the item
-		 * @return a builder
-		 */
-		MultiInputSpec selectItem(String name, String item);
-
-		/**
-		 * Adds a map of select items.
+		 * Adds a list of select items.
 		 *
 		 * @param selectItems the select items
 		 * @return a builder
 		 */
-		MultiInputSpec selectItems(Map<String, String> selectItems);
+		MultiInputSpec selectItems(List<SelectItem> selectItems);
 
 		/**
 		 * Sets a {@link Comparator} for sorting items.
@@ -526,11 +535,54 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 		}
 	}
 
+	public interface SelectItem {
+
+		String name();
+		String item();
+		boolean enabled();
+
+		public static SelectItem of(String name, String item) {
+			return of(name, item, true);
+		}
+
+		public static SelectItem of(String name, String item, boolean enabled) {
+			return new DefaultSelectItem(name, item, enabled);
+		}
+	}
+
+	static class DefaultSelectItem implements SelectItem {
+
+		private String name;
+		private String item;
+		private boolean enabled;
+
+		public DefaultSelectItem(String name, String item, boolean enabled) {
+			this.name = name;
+			this.item = item;
+			this.enabled = enabled;
+		}
+
+		@Override
+		public String name() {
+			return name;
+		}
+
+		@Override
+		public String item() {
+			return item;
+		}
+
+		@Override
+		public boolean enabled() {
+			return enabled;
+		}
+	}
+
 	static abstract class BaseMultiInput extends BaseInput implements MultiInputSpec {
 
 		private String name;
 		private List<String> currentValues = new ArrayList<>();
-		private Map<String, String> selectItems = new HashMap<>();
+		private List<SelectItem> selectItems = new ArrayList<>();
 		private Comparator<SelectorItem<String>> comparator;
 		private Function<MultiItemSelectorContext<SelectorItem<String>>, List<AttributedString>> renderer;
 
@@ -551,14 +603,8 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 		}
 
 		@Override
-		public MultiInputSpec selectItem(String name, String item) {
-			this.selectItems.put(name, item);
-			return this;
-		}
-
-		@Override
-		public MultiInputSpec selectItems(Map<String, String> selectItems) {
-			this.selectItems.putAll(selectItems);
+		public MultiInputSpec selectItems(List<SelectItem> selectItems) {
+			this.selectItems = selectItems;
 			return this;
 		}
 
@@ -588,7 +634,7 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 			return currentValues;
 		}
 
-		public Map<String, String> getSelectItems() {
+		public List<SelectItem> getSelectItemsx() {
 			return selectItems;
 		}
 
@@ -734,8 +780,8 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 						result.addMultiInput(input.getId(), currentValues);
 					}
 					else {
-						List<SelectorItem<String>> selectorItems = input.getSelectItems().entrySet().stream()
-								.map(e -> SelectorItem.of(e.getKey(), e.getValue()))
+						List<SelectorItem<String>> selectorItems = input.getSelectItemsx().stream()
+								.map(si -> SelectorItem.of(si.name(), si.item(), si.enabled()))
 								.collect(Collectors.toList());
 
 						DefaultMultiItemSelector<SelectorItem<String>> selector = new DefaultMultiItemSelector<>(terminal,
