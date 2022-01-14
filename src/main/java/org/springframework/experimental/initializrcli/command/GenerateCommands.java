@@ -27,23 +27,21 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import io.spring.initializr.generator.version.Version;
 import io.spring.initializr.generator.version.VersionParser;
-import io.spring.initializr.generator.version.VersionRange;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 
-import org.springframework.experimental.initializrcli.client.model.Dependency;
 import org.springframework.experimental.initializrcli.client.model.Metadata;
-import org.springframework.experimental.initializrcli.component.Matchable;
-import org.springframework.experimental.initializrcli.component.Nameable;
-import org.springframework.experimental.initializrcli.component.SelectorItem;
 import org.springframework.experimental.initializrcli.component.DefaultMultiItemSelector.MultiItemSelectorContext;
 import org.springframework.experimental.initializrcli.component.DefaultSingleItemSelector.SingleItemSelectorContext;
 import org.springframework.experimental.initializrcli.component.FieldInput.FieldInputContext;
+import org.springframework.experimental.initializrcli.component.Matchable;
+import org.springframework.experimental.initializrcli.component.Nameable;
+import org.springframework.experimental.initializrcli.component.SelectorItem;
+import org.springframework.experimental.initializrcli.support.InitializrUtils;
 import org.springframework.experimental.initializrcli.wizard.InputWizard;
 import org.springframework.experimental.initializrcli.wizard.InputWizard.InputWizardResult;
 import org.springframework.experimental.initializrcli.wizard.InputWizard.SelectItem;
@@ -206,9 +204,8 @@ public class GenerateCommands extends AbstractInitializrCommands {
 				.collect(Collectors.toMap(v -> v.getName(), v -> v.getId()));
 		List<SelectItem> dependenciesSelectItems = metadata.getDependencies().getValues().stream()
 				.flatMap(dc -> dc.getValues().stream())
-				.map(dep -> SelectItem.of(dep.getName(), dep.getId(), compatible(result1.singleInputs().get(BOOT_VERSION_ID), dep)))
+				.map(dep -> SelectItem.of(dep.getName(), dep.getId(), InitializrUtils.isDependencyCompatible(dep, result1.singleInputs().get(BOOT_VERSION_ID))))
 				.collect(Collectors.toList());
-
 		// wizard from deps
 		Wizard<InputWizardResult> wizard2 = InputWizard.builder(getTerminal())
 				.withMultiInput(DEPENDENCIES_ID)
@@ -265,15 +262,6 @@ public class GenerateCommands extends AbstractInitializrCommands {
 					generated.toFile().getAbsolutePath(), outFile.getAbsolutePath()), e);
 		}
 		return String.format("Extracted to %s", outFile.getAbsolutePath());
-	}
-
-	private static boolean compatible(String version, Dependency dependency) {
-		if (!StringUtils.hasText(version) || !StringUtils.hasText(dependency.getVersionRange())) {
-			return true;
-		}
-		Version parsedVersion = VERSION_PARSER_INSTANCE.parse(version);
-		VersionRange parsedRange = VERSION_PARSER_INSTANCE.parseRange(dependency.getVersionRange());
-		return parsedRange.match(parsedVersion);
 	}
 
 	private static class StyledFieldInputRenderer implements Function<FieldInputContext, List<AttributedString>> {
