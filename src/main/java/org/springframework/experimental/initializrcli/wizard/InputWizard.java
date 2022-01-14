@@ -214,6 +214,14 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 		SingleInputSpec renderer(Function<SingleItemSelectorContext<SelectorItem<String>>, List<AttributedString>> renderer);
 
 		/**
+		 * Sets a maximum number of items in a selector list;
+		 *
+		 * @param max the maximum number of items
+		 * @return a builder
+		 */
+		SingleInputSpec max(int max);
+
+		/**
 		 * Build and return parent builder.
 		 *
 		 * @return the parent builder
@@ -265,6 +273,14 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 		 * @return a builder
 		 */
 		MultiInputSpec renderer(Function<MultiItemSelectorContext<SelectorItem<String>>, List<AttributedString>> renderer);
+
+		/**
+		 * Sets a maximum number of items in a selector list;
+		 *
+		 * @param max the maximum number of items
+		 * @return a builder
+		 */
+		MultiInputSpec max(int max);
 
 		/**
 		 * Build and return parent builder.
@@ -460,6 +476,7 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 		private Map<String, String> selectItems = new HashMap<>();
 		private Comparator<SelectorItem<String>> comparator;
 		private Function<SingleItemSelectorContext<SelectorItem<String>>, List<AttributedString>> renderer;
+		private Integer maxItems;
 
 		public BaseSingleInput(BaseBuilder builder, String id) {
 			super(builder, id);
@@ -502,6 +519,12 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 		}
 
 		@Override
+		public SingleInputSpec max(int max) {
+			this.maxItems = max;
+			return this;
+		}
+
+		@Override
 		public Builder and() {
 			getBuilder().addSingleInput(this);
 			return getBuilder();
@@ -525,6 +548,10 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 
 		public Function<SingleItemSelectorContext<SelectorItem<String>>, List<AttributedString>> getRenderer() {
 			return renderer;
+		}
+
+		public Integer getMaxItems() {
+			return maxItems;
 		}
 	}
 
@@ -585,6 +612,7 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 		private List<SelectItem> selectItems = new ArrayList<>();
 		private Comparator<SelectorItem<String>> comparator;
 		private Function<MultiItemSelectorContext<SelectorItem<String>>, List<AttributedString>> renderer;
+		private Integer maxItems;
 
 		public BaseMultiInput(BaseBuilder builder, String id) {
 			super(builder, id);
@@ -621,6 +649,12 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 		}
 
 		@Override
+		public MultiInputSpec max(int max) {
+			this.maxItems = max;
+			return this;
+		}
+
+		@Override
 		public Builder and() {
 			getBuilder().addMultiInput(this);
 			return getBuilder();
@@ -644,6 +678,10 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 
 		public Function<MultiItemSelectorContext<SelectorItem<String>>, List<AttributedString>> getRenderer() {
 			return renderer;
+		}
+
+		public Integer getMaxItems() {
+			return maxItems;
 		}
 	}
 
@@ -759,6 +797,9 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 						if (input.getRenderer() != null) {
 							selector.setRenderer(input.getRenderer());
 						}
+						if (input.getMaxItems() != null) {
+							selector.setMaxItems(input.getMaxItems());
+						}
 						Optional<SelectorItem<String>> select = selector.select();
 						String type = select.map(i -> i.getItem()).orElse("<none>");
 						result.addSingleInput(input.getId(), type);
@@ -788,6 +829,9 @@ public interface InputWizard extends Wizard<InputWizardResult> {
 								selectorItems, input.getName(), input.getComparator());
 						if (input.getRenderer() != null) {
 							selector.setRenderer(input.getRenderer());
+						}
+						if (input.getMaxItems() != null) {
+							selector.setMaxItems(input.getMaxItems());
 						}
 						List<SelectorItem<String>> select = selector.select();
 						List<String> values = select.stream().map(i -> i.getItem()).collect(Collectors.toList());

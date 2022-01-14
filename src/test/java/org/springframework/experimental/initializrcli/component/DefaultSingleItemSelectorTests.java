@@ -42,10 +42,14 @@ public class DefaultSingleItemSelectorTests extends AbstractShellTests {
 	private static SimplePojo SIMPLE_POJO_2 = SimplePojo.of("data2");
 	private static SimplePojo SIMPLE_POJO_3 = SimplePojo.of("data3");
 	private static SimplePojo SIMPLE_POJO_4 = SimplePojo.of("data4");
+	private static SimplePojo SIMPLE_POJO_5 = SimplePojo.of("data5");
+	private static SimplePojo SIMPLE_POJO_6 = SimplePojo.of("data6");
 	private static SelectorItem<SimplePojo> SELECTOR_ITEM_1 = SelectorItem.of("simplePojo1", SIMPLE_POJO_1);
 	private static SelectorItem<SimplePojo> SELECTOR_ITEM_2 = SelectorItem.of("simplePojo2", SIMPLE_POJO_2);
 	private static SelectorItem<SimplePojo> SELECTOR_ITEM_3 = SelectorItem.of("simplePojo3", SIMPLE_POJO_3);
 	private static SelectorItem<SimplePojo> SELECTOR_ITEM_4 = SelectorItem.of("simplePojo4", SIMPLE_POJO_4);
+	private static SelectorItem<SimplePojo> SELECTOR_ITEM_5 = SelectorItem.of("simplePojo5", SIMPLE_POJO_5);
+	private static SelectorItem<SimplePojo> SELECTOR_ITEM_6 = SelectorItem.of("simplePojo6", SIMPLE_POJO_6);
 
 	private ExecutorService service;
 	private CountDownLatch latch;
@@ -72,7 +76,17 @@ public class DefaultSingleItemSelectorTests extends AbstractShellTests {
 	public void testItemsShown() {
 		scheduleSelect();
 		await().atMost(Duration.ofSeconds(4))
-				.untilAsserted(() -> assertStringOrderThat(consoleOut()).containsInOrder("simplePojo1", "simplePojo2", "simplePojo3", "simplePojo4"));
+				.untilAsserted(() -> assertStringOrderThat(consoleOut()).containsInOrder("simplePojo1", "simplePojo2",
+						"simplePojo3", "simplePojo4"));
+	}
+
+	@Test
+	public void testMaxItems() {
+		scheduleSelect(Arrays.asList(SELECTOR_ITEM_1, SELECTOR_ITEM_2, SELECTOR_ITEM_3, SELECTOR_ITEM_4,
+				SELECTOR_ITEM_5, SELECTOR_ITEM_6), 6);
+		await().atMost(Duration.ofSeconds(4))
+				.untilAsserted(() -> assertStringOrderThat(consoleOut()).containsInOrder("simplePojo1", "simplePojo2",
+						"simplePojo3", "simplePojo4", "simplePojo5", "simplePojo6"));
 	}
 
 	@Test
@@ -121,9 +135,20 @@ public class DefaultSingleItemSelectorTests extends AbstractShellTests {
 	}
 
 	private void scheduleSelect() {
-		List<SelectorItem<SimplePojo>> items = Arrays.asList(SELECTOR_ITEM_1, SELECTOR_ITEM_2, SELECTOR_ITEM_3,
-				SELECTOR_ITEM_4);
-		DefaultSingleItemSelector<SelectorItem<SimplePojo>> selector = new DefaultSingleItemSelector<>(getTerminal(), items, "testSimple", null);
+		scheduleSelect(Arrays.asList(SELECTOR_ITEM_1, SELECTOR_ITEM_2, SELECTOR_ITEM_3,
+				SELECTOR_ITEM_4));
+	}
+
+	private void scheduleSelect(List<SelectorItem<SimplePojo>> items) {
+		scheduleSelect(items, null);
+	}
+
+	private void scheduleSelect(List<SelectorItem<SimplePojo>> items, Integer maxItems) {
+		DefaultSingleItemSelector<SelectorItem<SimplePojo>> selector = new DefaultSingleItemSelector<>(getTerminal(),
+				items, "testSimple", null);
+		if (maxItems != null) {
+			selector.setMaxItems(maxItems);
+		}
 		service.execute(() -> {
 			result.set(selector.select());
 			latch.countDown();

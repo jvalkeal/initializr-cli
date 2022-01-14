@@ -45,6 +45,7 @@ public abstract class AbstractSelector<T extends Nameable & Matchable & Enableab
 	private List<ItemState<T>> itemStates;
 	private boolean exitSelects;
 	private Comparator<T> comparator = (o1, o2) -> 0;
+	private int maxItems = 5;
 
 	public AbstractSelector(Terminal terminal, List<T> items, boolean exitSelects, Comparator<T> comparator) {
 		Assert.notNull(terminal, "terminal must be set");
@@ -56,6 +57,11 @@ public abstract class AbstractSelector<T extends Nameable & Matchable & Enableab
 			this.comparator = comparator;
 		}
 		init();
+	}
+
+	public void setMaxItems(int maxItems) {
+		Assert.state(maxItems > 0 || maxItems < 33, "maxItems has to be between 1 and 32");
+		this.maxItems = maxItems;
 	}
 
 	public abstract S select();
@@ -103,8 +109,6 @@ public abstract class AbstractSelector<T extends Nameable & Matchable & Enableab
 			this.total = total;
 		}
 	}
-
-	private int maxItems = 5;
 
 	private boolean stale = false;
 

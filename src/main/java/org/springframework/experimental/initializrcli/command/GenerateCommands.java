@@ -217,6 +217,7 @@ public class GenerateCommands extends AbstractInitializrCommands {
 					.selectItems(dependenciesSelectItems)
 					.sort(NAME_COMPARATOR)
 					.renderer(MULTI_ITEM_SELECTOR_RENDERER)
+					.max(7)
 					.and()
 				.withSingleInput(PACKAGING_ID)
 					.name(PACKAGING_NAME)
