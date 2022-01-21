@@ -73,21 +73,47 @@ public class SingleItemSelector<T, I extends Nameable & Matchable & Enableable &
 		return context;
 	}
 
+	/**
+	 * Context {@link SingleItemSelector}.
+	 */
 	public interface SingleItemSelectorContext<T, I extends Nameable & Matchable & Itemable<T>>
 			extends SelectorComponentContext<T, I, SingleItemSelectorContext<T, I>> {
+
+		/**
+		 * Gets a result item.
+		 *
+		 * @return a result item
+		 */
 		Optional<I> getResultItem();
+
+		/**
+		 * Gets a value.
+		 *
+		 * @return a value
+		 */
 		Optional<String> getValue();
 
-		static <X, I extends Nameable & Matchable & Itemable<X>> SingleItemSelectorContext<X, I> empty() {
+		/**
+		 * Creates an empty {@link SingleItemSelectorContext}.
+		 *
+		 * @return empty context
+		 */
+		static <C, I extends Nameable & Matchable & Itemable<C>> SingleItemSelectorContext<C, I> empty() {
 			return new DefaultSingleItemSelectorContext<>();
 		}
-		static <X, I extends Nameable & Matchable & Itemable<X>> SingleItemSelectorContext<X, I> empty(Function<X, String> itemMapper) {
+
+		/**
+		 * Creates a {@link SingleItemSelectorContext}.
+		 *
+		 * @return context
+		 */
+		static <C, I extends Nameable & Matchable & Itemable<C>> SingleItemSelectorContext<C, I> empty(Function<C, String> itemMapper) {
 			return new DefaultSingleItemSelectorContext<>(itemMapper);
 		}
 	}
 
 	private static class DefaultSingleItemSelectorContext<T, I extends Nameable & Matchable & Itemable<T>> extends
-			DefaultSelectorComponentContext<T, I, SingleItemSelectorContext<T, I>> implements SingleItemSelectorContext<T, I> {
+			BaseSelectorComponentContext<T, I, SingleItemSelectorContext<T, I>> implements SingleItemSelectorContext<T, I> {
 
 		private Function<T, String> itemMapper = item -> item.toString();
 
@@ -149,5 +175,4 @@ public class SingleItemSelector<T, I extends Nameable & Matchable & Enableable &
 			return out;
 		}
 	}
-
 }

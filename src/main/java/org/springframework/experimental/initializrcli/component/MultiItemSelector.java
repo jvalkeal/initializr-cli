@@ -73,21 +73,40 @@ public class MultiItemSelector<T, I extends Nameable & Matchable & Enableable & 
 		return context;
 	}
 
+	/**
+	 * Context {@link MultiItemSelector}.
+	 */
 	public interface MultiItemSelectorContext<T, I extends Nameable & Matchable & Itemable<T>>
 			extends SelectorComponentContext<T, I, MultiItemSelectorContext<T, I>> {
 
+		/**
+		 * Gets a values.
+		 *
+		 * @return a values
+		 */
 		List<String> getValues();
 
-		static <X, I extends Nameable & Matchable & Itemable<X>> MultiItemSelectorContext<X, I> empty() {
+		/**
+		 * Creates an empty {@link MultiItemSelectorContext}.
+		 *
+		 * @return empty context
+		 */
+		static <T, I extends Nameable & Matchable & Itemable<T>> MultiItemSelectorContext<T, I> empty() {
 			return new DefaultMultiItemSelectorContext<>();
 		}
-		static <X, I extends Nameable & Matchable & Itemable<X>> MultiItemSelectorContext<X, I> empty(Function<X, String> itemMapper) {
+
+		/**
+		 * Creates an {@link MultiItemSelectorContext}.
+		 *
+		 * @return context
+		 */
+		static <T, I extends Nameable & Matchable & Itemable<T>> MultiItemSelectorContext<T, I> empty(Function<T, String> itemMapper) {
 			return new DefaultMultiItemSelectorContext<>(itemMapper);
 		}
 	}
 
 	private static class DefaultMultiItemSelectorContext<T, I extends Nameable & Matchable & Itemable<T>> extends
-			DefaultSelectorComponentContext<T, I, MultiItemSelectorContext<T, I>> implements MultiItemSelectorContext<T, I> {
+			BaseSelectorComponentContext<T, I, MultiItemSelectorContext<T, I>> implements MultiItemSelectorContext<T, I> {
 
 		private Function<T, String> itemMapper = item -> item.toString();
 

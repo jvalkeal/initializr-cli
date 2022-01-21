@@ -50,6 +50,9 @@ public abstract class AbstractSelectorComponent<T, C extends SelectorComponentCo
 	private boolean exitSelects;
 	private int maxItems = 5;
 	private Function<T, String> itemMapper = item -> item.toString();
+	private boolean stale = false;
+	private AtomicInteger start = new AtomicInteger(0);
+	private AtomicInteger pos = new AtomicInteger(0);
 
 	public AbstractSelectorComponent(Terminal terminal, String name, List<I> items, boolean exitSelects,
 			Comparator<I> comparator) {
@@ -62,20 +65,40 @@ public abstract class AbstractSelectorComponent<T, C extends SelectorComponentCo
 		}
 	}
 
+	/**
+	 * Set max items to show.
+	 *
+	 * @param maxItems max items
+	 */
 	public void setMaxItems(int maxItems) {
 		Assert.state(maxItems > 0 || maxItems < 33, "maxItems has to be between 1 and 32");
 		this.maxItems = maxItems;
 	}
 
+	/**
+	 * Sets an item mapper.
+	 *
+	 * @param itemMapper the item mapper
+	 */
 	public void setItemMapper(Function<T, String> itemMapper) {
 		Assert.notNull(itemMapper, "itemMapper cannot be null");
 		this.itemMapper = itemMapper;
 	}
 
+	/**
+	 * Gets an item mapper.
+	 *
+	 * @return
+	 */
 	public Function<T, String> getItemMapper() {
 		return itemMapper;
 	}
 
+	/**
+	 * Gets items.
+	 *
+	 * @return a list of items
+	 */
 	protected List<I> getItems() {
 		return items;
 	}
@@ -102,10 +125,6 @@ public abstract class AbstractSelectorComponent<T, C extends SelectorComponentCo
 		thisContext.setCursorRow(start.get() + pos.get());
 		return thisContext;
 	}
-
-	private boolean stale = false;
-	AtomicInteger start = new AtomicInteger(0);
-	AtomicInteger pos = new AtomicInteger(0);
 
 	@Override
 	protected boolean read(BindingReader bindingReader, KeyMap<String> keyMap, C context) {
@@ -235,31 +254,131 @@ public abstract class AbstractSelectorComponent<T, C extends SelectorComponentCo
 		}
 	}
 
+	/**
+	 * Context interface on a selector component sharing content.
+	 */
 	public interface SelectorComponentContext<T, I extends Nameable & Matchable & Itemable<T>, C extends SelectorComponentContext<T, I, C>>
 			extends ComponentContext<C> {
+
+		/**
+		 * Gets a name.
+		 *
+		 * @return a name
+		 */
 		String getName();
+
+		/**
+		 * Sets a name
+		 *
+		 * @param name the name
+		 */
 		void setName(String name);
+
+		/**
+		 * Gets an input.
+		 *
+		 * @return an input
+		 */
 		String getInput();
+
+		/**
+		 * Sets an input.
+		 *
+		 * @param input the input
+		 */
 		void setInput(String input);
+
+		/**
+		 * Gets an item states
+		 *
+		 * @return an item states
+		 */
 		List<ItemState<I>> getItemStates();
+
+		/**
+		 * Sets an item states.
+		 *
+		 * @param itemStateView the input state
+		 */
 		void setItemStates(List<ItemState<I>> itemStateView);
+
+		/**
+		 * Gets an item state view.
+		 *
+		 * @return an item state view
+		 */
 		List<ItemState<I>> getItemStateView();
+
+		/**
+		 * Sets an item state view
+		 *
+		 * @param itemStateView the item state view
+		 */
 		void setItemStateView(List<ItemState<I>> itemStateView);
+
+		/**
+		 * Return if there is a result.
+		 *
+		 * @return true if context represents result
+		 */
 		boolean isResult();
+
+		/**
+		 * Gets a cursor row.
+		 *
+		 * @return a cursor row.
+		 */
 		Integer getCursorRow();
+
+		/**
+		 * Sets a cursor row.
+		 *
+		 * @param cursorRow the cursor row
+		 */
 		void setCursorRow(Integer cursorRow);
+
+		/**
+		 * Gets an items.
+		 *
+		 * @return an items
+		 */
 		List<I> getItems();
+
+		/**
+		 * Sets an items.
+		 *
+		 * @param items the items
+		 */
 		void setItems(List<I> items);
+
+		/**
+		 * Gets a result items.
+		 *
+		 * @return a result items
+		 */
 		List<I> getResultItems();
+
+		/**
+		 * Sets a result items.
+		 *
+		 * @param items the result items
+		 */
 		void setResultItems(List<I> items);
 
+		/**
+		 * Creates an empty {@link SelectorComponentContext}.
+		 *
+		 * @return empty context
+		 */
 		static <T, I extends Nameable & Matchable & Itemable<T>, C extends SelectorComponentContext<T, I, C>> SelectorComponentContext<T, I, C> empty() {
-			return new DefaultSelectorComponentContext<>();
+			return new BaseSelectorComponentContext<>();
 		}
-
 	}
 
-	protected static class DefaultSelectorComponentContext<T, I extends Nameable & Matchable & Itemable<T>, C extends SelectorComponentContext<T, I, C>>
+	/**
+	 * Base implementation of a {@link SelectorComponentContext}.
+	 */
+	protected static class BaseSelectorComponentContext<T, I extends Nameable & Matchable & Itemable<T>, C extends SelectorComponentContext<T, I, C>>
 			extends BaseComponentContext<C> implements SelectorComponentContext<T, I, C> {
 
 		private String name;
@@ -350,6 +469,9 @@ public abstract class AbstractSelectorComponent<T, C extends SelectorComponentCo
 		}
 	}
 
+	/**
+	 * Class keeping item state.
+	 */
 	public static class ItemState<I extends Matchable> implements Matchable {
 		I item;
 		String name;

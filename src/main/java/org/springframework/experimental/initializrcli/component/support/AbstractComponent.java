@@ -140,27 +140,44 @@ public abstract class AbstractComponent<T extends ComponentContext<T>> {
 		return run;
 	}
 
-	void printResults(ComponentContext<?> context) {
-		log.debug("About to write result with incoming context [{}] as class [{}] in [{}]", context, context.getClass(),
-				this);
-		String out = render(getThisContext(context)).stream()
-				.map(as -> as.toAnsi())
-				.collect(Collectors.joining("\n"));
-		log.debug("Writing result [{}] in [{}]", out, this);
-		if (StringUtils.hasText(out)) {
-			terminal.writer().println(out);
-			terminal.writer().flush();
-		}
-	}
-
+	/**
+	 * Gets a real component context using common this trick.
+	 *
+	 * @param context the context
+	 * @return a component context
+	 */
 	protected abstract T getThisContext(ComponentContext<?> context);
 
+	/**
+	 * Read input.
+	 *
+	 * @param bindingReader the binding reader
+	 * @param keyMap the key map
+	 * @param context the context
+	 * @return true if read is complete, false to stop
+	 */
 	protected abstract boolean read(BindingReader bindingReader, KeyMap<String> keyMap, T context);
 
+	/**
+	 * Run internal logic called from public run method.
+	 *
+	 * @param context the context
+	 * @return a context
+	 */
 	protected abstract T runInternal(T context);
 
+	/**
+	 * Bind key map.
+	 *
+	 * @param keyMap
+	 */
 	protected abstract void bindKeyMap(KeyMap<String> keyMap);
 
+	/**
+	 * Enter into read loop. This should be called from a component.
+	 *
+	 * @param context the context
+	 */
 	protected void loop(ComponentContext<?> context) {
 		Display display = new Display(terminal, false);
 		Attributes attr = terminal.enterRawMode();
@@ -191,14 +208,38 @@ public abstract class AbstractComponent<T extends ComponentContext<T>> {
 		}
 	}
 
+	/**
+	 * Run pre-run handlers
+	 *
+	 * @param context the context
+	 * @return a context
+	 */
 	protected T runPreRunHandlers(T context) {
 		this.preRunHandlers.stream().forEach(c -> c.accept(context));
 		return context;
 	}
 
+	/**
+	 * Run post-run handlers
+	 *
+	 * @param context the context
+	 * @return a context
+	 */
 	protected T runPostRunHandlers(T context) {
 		this.postRunHandlers.stream().forEach(c -> c.accept(context));
 		return context;
 	}
 
+	private void printResults(ComponentContext<?> context) {
+		log.debug("About to write result with incoming context [{}] as class [{}] in [{}]", context, context.getClass(),
+				this);
+		String out = render(getThisContext(context)).stream()
+				.map(as -> as.toAnsi())
+				.collect(Collectors.joining("\n"));
+		log.debug("Writing result [{}] in [{}]", out, this);
+		if (StringUtils.hasText(out)) {
+			terminal.writer().println(out);
+			terminal.writer().flush();
+		}
+	}
 }
