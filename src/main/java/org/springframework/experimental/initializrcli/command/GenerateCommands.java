@@ -17,7 +17,6 @@ package org.springframework.experimental.initializrcli.command;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,7 +26,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import io.spring.initializr.generator.version.VersionParser;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
@@ -35,16 +33,18 @@ import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 
 import org.springframework.experimental.initializrcli.client.model.Metadata;
-import org.springframework.experimental.initializrcli.component.DefaultMultiItemSelector.MultiItemSelectorContext;
-import org.springframework.experimental.initializrcli.component.DefaultSingleItemSelector.SingleItemSelectorContext;
-import org.springframework.experimental.initializrcli.component.FieldInput.FieldInputContext;
-import org.springframework.experimental.initializrcli.component.Matchable;
-import org.springframework.experimental.initializrcli.component.Nameable;
-import org.springframework.experimental.initializrcli.component.SelectorItem;
+import org.springframework.experimental.initializrcli.component.MultiItemSelector.MultiItemSelectorContext;
+import org.springframework.experimental.initializrcli.component.PathInput.PathInputContext;
+import org.springframework.experimental.initializrcli.component.SingleItemSelector.SingleItemSelectorContext;
+import org.springframework.experimental.initializrcli.component.StringInput.StringInputContext;
+import org.springframework.experimental.initializrcli.component.context.ComponentContext;
+import org.springframework.experimental.initializrcli.component.support.SelectorItem;
+import org.springframework.experimental.initializrcli.component.support.AbstractTextComponent.TextComponentContext.MessageLevel;
 import org.springframework.experimental.initializrcli.support.InitializrUtils;
-import org.springframework.experimental.initializrcli.wizard.InputWizard;
-import org.springframework.experimental.initializrcli.wizard.InputWizard.InputWizardResult;
-import org.springframework.experimental.initializrcli.wizard.InputWizard.SelectItem;
+import org.springframework.experimental.initializrcli.wizard.ComponentFlow;
+import org.springframework.experimental.initializrcli.wizard.ComponentFlow.ComponentFlowResult;
+import org.springframework.experimental.initializrcli.wizard.ComponentFlow.ResultMode;
+import org.springframework.experimental.initializrcli.wizard.ComponentFlow.SelectItem;
 import org.springframework.experimental.initializrcli.wizard.Wizard;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -55,6 +55,8 @@ import org.springframework.util.StringUtils;
 @ShellComponent
 public class GenerateCommands extends AbstractInitializrCommands {
 
+	private final static String PATH_NAME = "Path";
+	private final static String PATH_ID = "path";
 	private final static String PROJECT_NAME = "Project";
 	private final static String PROJECT_ID = "project";
 	private final static String LANGUAGE_NAME = "Language";
@@ -81,10 +83,9 @@ public class GenerateCommands extends AbstractInitializrCommands {
 	private final static String JAVA_VERSION_ID = "javaVersion";
 
 	private final static StyledFieldInputRenderer FIELD_INPUT_RENDERER = new StyledFieldInputRenderer();
-	private final static StyledSingleItemSelectorRenderer<SelectorItem<String>> SINGLE_ITEM_SELECTOR_RENDERER = new StyledSingleItemSelectorRenderer<>();
-	private final static StyledMultiItemSelectorRenderer<SelectorItem<String>> MULTI_ITEM_SELECTOR_RENDERER = new StyledMultiItemSelectorRenderer<>();
-
-	private final static VersionParser VERSION_PARSER_INSTANCE = new VersionParser(Collections.emptyList());
+	private final static StyledPathInputRenderer PATH_INPUT_RENDERER = new StyledPathInputRenderer();
+	private final static StyledSingleItemSelectorRenderer<String, SelectorItem<String>> SINGLE_ITEM_SELECTOR_RENDERER = new StyledSingleItemSelectorRenderer<>();
+	private final static StyledMultiItemSelectorRenderer<String, SelectorItem<String>> MULTI_ITEM_SELECTOR_RENDERER = new StyledMultiItemSelectorRenderer<>();
 
 	private final static Comparator<SelectorItem<String>> NAME_COMPARATOR = (o1, o2) -> {
 		return o1.getName().compareTo(o2.getName());
@@ -99,9 +100,10 @@ public class GenerateCommands extends AbstractInitializrCommands {
 		return NAME_COMPARATOR.compare(o1, o2);
 	};
 
+
 	@ShellMethod(key = "init", value = "Initialize project")
 	public String init(
-		@ShellOption(help = "Path to extract") String path,
+		@ShellOption(help = "Path to extract", defaultValue = ShellOption.NULL) String path,
 		@ShellOption(help = "Project", defaultValue = ShellOption.NULL) String project,
 		@ShellOption(help = "Language", defaultValue = ShellOption.NULL) String language,
 		@ShellOption(help = "Language", defaultValue = ShellOption.NULL) String bootVersion,
@@ -117,9 +119,6 @@ public class GenerateCommands extends AbstractInitializrCommands {
 	) {
 		Metadata metadata = client.getMetadata();
 
-		// Need to run wizard in two steps as for dependencies we need a boot version
-		// able to define which deps are available and thus can be selected.
-
 		Map<String, String> projectSelectItems = metadata.getType().getValues().stream()
 				.filter(v -> ObjectUtils.nullSafeEquals(v.getTags().get("format"), "project"))
 				.collect(Collectors.toMap(v -> v.getName(), v -> v.getId()));
@@ -134,123 +133,140 @@ public class GenerateCommands extends AbstractInitializrCommands {
 		String defaultDescription = metadata.getDescription().getDefault();
 		String defaultPackageName = metadata.getPackageName().getDefault();
 		dependencies = dependencies == null ? Collections.emptyList() : dependencies;
-
-		// wizard before deps
-		Wizard<InputWizardResult> wizard1 = InputWizard.builder(getTerminal())
-				.withSingleInput(PROJECT_ID)
-					.name(PROJECT_NAME)
-					.currentValue(project)
-					.selectItems(projectSelectItems)
-					.sort(NAME_COMPARATOR)
-					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
-					.and()
-				.withSingleInput(LANGUAGE_ID)
-					.name(LANGUAGE_NAME)
-					.currentValue(language)
-					.selectItems(languageSelectItems)
-					.sort(NAME_COMPARATOR)
-					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
-					.and()
-				.withSingleInput(BOOT_VERSION_ID)
-					.name(BOOT_VERSION_NAME)
-					.currentValue(bootVersion)
-					.selectItems(bootSelectItems)
-					.sort(NAME_COMPARATOR.reversed())
-					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
-					.and()
-				.withTextInput(VERSION_ID)
-					.name(VERSION_NAME)
-					.defaultValue(defaultVersion)
-					.currentValue(version)
-					.renderer(FIELD_INPUT_RENDERER)
-					.and()
-				.withTextInput(GROUP_ID)
-					.name(GROUP_NAME)
-					.defaultValue(defaultGroupId)
-					.currentValue(group)
-					.renderer(FIELD_INPUT_RENDERER)
-					.and()
-				.withTextInput(ARTIFACT_ID)
-					.name(ARTIFACT_NAME)
-					.defaultValue(defaultArtifact)
-					.currentValue(artifact)
-					.renderer(FIELD_INPUT_RENDERER)
-					.and()
-				.withTextInput(NAME_ID)
-					.name(NAME_NAME)
-					.defaultValue(defaultName)
-					.currentValue(name)
-					.renderer(FIELD_INPUT_RENDERER)
-					.and()
-				.withTextInput(DESCRIPTION_ID)
-					.name(DESCRIPTION_NAME)
-					.defaultValue(defaultDescription)
-					.currentValue(description)
-					.renderer(FIELD_INPUT_RENDERER)
-					.and()
-				.withTextInput(PACKAGE_NAME_ID)
-					.name(PACKAGE_NAME_NAME)
-					.defaultValue(defaultPackageName)
-					.currentValue(packageName)
-					.renderer(FIELD_INPUT_RENDERER)
-					.and()
-				.build();
-
-		InputWizardResult result1 = wizard1.run();
-
 		Map<String, String> packagingSelectItems = metadata.getPackaging().getValues().stream()
 				.collect(Collectors.toMap(v -> v.getName(), v -> v.getId()));
 		Map<String, String> javaVersionSelectItems = metadata.getJavaVersion().getValues().stream()
 				.collect(Collectors.toMap(v -> v.getName(), v -> v.getId()));
-		List<SelectItem> dependenciesSelectItems = metadata.getDependencies().getValues().stream()
-				.flatMap(dc -> dc.getValues().stream())
-				.map(dep -> SelectItem.of(dep.getName(), dep.getId(), InitializrUtils.isDependencyCompatible(dep, result1.singleInputs().get(BOOT_VERSION_ID))))
-				.collect(Collectors.toList());
-		// wizard from deps
-		Wizard<InputWizardResult> wizard2 = InputWizard.builder(getTerminal())
-				.withMultiInput(DEPENDENCIES_ID)
+
+		Wizard<ComponentFlowResult> wizard = ComponentFlow.builder(getTerminal())
+				.withPathInput(PATH_ID)
+					.name(PATH_NAME)
+					.resultValue(path)
+					.resultMode(ResultMode.ACCEPT)
+					.renderer(PATH_INPUT_RENDERER)
+					.and()
+				.withSingleItemSelector(PROJECT_ID)
+					.name(PROJECT_NAME)
+					.resultValue(project)
+					.resultMode(ResultMode.ACCEPT)
+					.selectItems(projectSelectItems)
+					.sort(NAME_COMPARATOR)
+					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
+					.and()
+				.withSingleItemSelector(LANGUAGE_ID)
+					.name(LANGUAGE_NAME)
+					.resultValue(language)
+					.resultMode(ResultMode.ACCEPT)
+					.selectItems(languageSelectItems)
+					.sort(NAME_COMPARATOR)
+					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
+					.and()
+				.withSingleItemSelector(BOOT_VERSION_ID)
+					.name(BOOT_VERSION_NAME)
+					.resultValue(bootVersion)
+					.resultMode(ResultMode.ACCEPT)
+					.selectItems(bootSelectItems)
+					.sort(NAME_COMPARATOR.reversed())
+					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
+					.and()
+				.withStringInput(VERSION_ID)
+					.name(VERSION_NAME)
+					.defaultValue(defaultVersion)
+					.resultValue(version)
+					.resultMode(ResultMode.ACCEPT)
+					.renderer(FIELD_INPUT_RENDERER)
+					.and()
+				.withStringInput(GROUP_ID)
+					.name(GROUP_NAME)
+					.defaultValue(defaultGroupId)
+					.resultValue(group)
+					.resultMode(ResultMode.ACCEPT)
+					.renderer(FIELD_INPUT_RENDERER)
+					.and()
+				.withStringInput(ARTIFACT_ID)
+					.name(ARTIFACT_NAME)
+					.defaultValue(defaultArtifact)
+					.resultValue(artifact)
+					.resultMode(ResultMode.ACCEPT)
+					.renderer(FIELD_INPUT_RENDERER)
+					.and()
+				.withStringInput(NAME_ID)
+					.name(NAME_NAME)
+					.defaultValue(defaultName)
+					.resultValue(name)
+					.resultMode(ResultMode.ACCEPT)
+					.renderer(FIELD_INPUT_RENDERER)
+					.and()
+				.withStringInput(DESCRIPTION_ID)
+					.name(DESCRIPTION_NAME)
+					.defaultValue(defaultDescription)
+					.resultValue(description)
+					.resultMode(ResultMode.ACCEPT)
+					.renderer(FIELD_INPUT_RENDERER)
+					.and()
+				.withStringInput(PACKAGE_NAME_ID)
+					.name(PACKAGE_NAME_NAME)
+					.defaultValue(defaultPackageName)
+					.resultValue(packageName)
+					.resultMode(ResultMode.ACCEPT)
+					.renderer(FIELD_INPUT_RENDERER)
+					.and()
+				.withMultiItemSelector(DEPENDENCIES_ID)
 					.name(DEPENDENCIES_NAME)
-					.currentValue(dependencies)
-					.selectItems(dependenciesSelectItems)
+					.resultValues(dependencies)
+					.resultMode(ResultMode.ACCEPT)
+					.preHandler(context -> {
+						String bootVersionValue = context.get(BOOT_VERSION_ID);
+						List<SelectItem> dependenciesSelectItems = metadata.getDependencies().getValues().stream()
+								.flatMap(dc -> dc.getValues().stream())
+								.map(dep -> SelectItem.of(dep.getName(), dep.getId(), InitializrUtils.isDependencyCompatible(dep, bootVersionValue)))
+								.collect(Collectors.toList());
+						List<SelectorItem<String>> selectorItems = dependenciesSelectItems.stream()
+								.map(si -> SelectorItem.of(si.name(), si.item(), si.enabled()))
+								.collect(Collectors.toList());
+						context.setItems(selectorItems);
+					})
 					.sort(NAME_COMPARATOR)
 					.renderer(MULTI_ITEM_SELECTOR_RENDERER)
 					.max(7)
 					.and()
-				.withSingleInput(PACKAGING_ID)
+				.withSingleItemSelector(PACKAGING_ID)
 					.name(PACKAGING_NAME)
-					.currentValue(packaging)
+					.resultValue(packaging)
+					.resultMode(ResultMode.ACCEPT)
 					.selectItems(packagingSelectItems)
 					.sort(NAME_COMPARATOR)
 					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
 					.and()
-				.withSingleInput(JAVA_VERSION_ID)
+				.withSingleItemSelector(JAVA_VERSION_ID)
 					.name(JAVA_VERSION_NAME)
-					.currentValue(javaVersion)
+					.resultValue(javaVersion)
+					.resultMode(ResultMode.ACCEPT)
 					.selectItems(javaVersionSelectItems)
 					.sort(JAVA_VERSION_COMPARATOR)
 					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
 					.and()
 				.build();
 
-		InputWizardResult result2 = wizard2.run();
+		ComponentFlowResult result = wizard.run();
+		ComponentContext<?> context = result.getContext();
 
-		InputWizardResult result = InputWizardResult.merge(result1, result2);
+		Path pathValue = result.getContext().get(PATH_ID);
+		List<String> dependenciesValue = result.getContext().get(DEPENDENCIES_ID);
+		Path generated = client.generate(context.get(PROJECT_ID, String.class),
+				context.get(LANGUAGE_ID, String.class),
+				context.get(BOOT_VERSION_ID, String.class),
+				dependenciesValue,
+				context.get(VERSION_ID, String.class),
+				context.get(GROUP_ID, String.class),
+				context.get(ARTIFACT_ID, String.class),
+				context.get(NAME_ID, String.class),
+				context.get(DESCRIPTION_ID, String.class),
+				context.get(PACKAGE_NAME_ID, String.class),
+				context.get(PACKAGING_ID, String.class),
+				context.get(JAVA_VERSION_ID, String.class));
 
-		Path generated = client.generate(result.singleInputs().get(PROJECT_ID),
-				result.singleInputs().get(LANGUAGE_ID),
-				result.singleInputs().get(BOOT_VERSION_ID),
-				result.multiInputs().get(DEPENDENCIES_ID),
-				result.textInputs().get(VERSION_ID),
-				result.textInputs().get(GROUP_ID),
-				result.textInputs().get(ARTIFACT_ID),
-				result.textInputs().get(NAME_ID),
-				result.textInputs().get(DESCRIPTION_ID),
-				result.textInputs().get(PACKAGE_NAME_ID),
-				result.singleInputs().get(PACKAGING_ID),
-				result.singleInputs().get(JAVA_VERSION_ID));
-
-		Path outPath = Paths.get(path);
-		File outFile = outPath.toFile();
+		File outFile = pathValue.toFile();
 		if (!outFile.mkdirs()) {
 			throw new RuntimeException(String.format("Can't create path %s", outFile.getAbsolutePath()));
 		}
@@ -264,21 +280,73 @@ public class GenerateCommands extends AbstractInitializrCommands {
 		return String.format("Extracted to %s", outFile.getAbsolutePath());
 	}
 
-	private static class StyledFieldInputRenderer implements Function<FieldInputContext, List<AttributedString>> {
+	private static class StyledPathInputRenderer implements Function<PathInputContext, List<AttributedString>> {
 
 		@Override
-		public List<AttributedString> apply(FieldInputContext context) {
+		public List<AttributedString> apply(PathInputContext context) {
+			List<AttributedString> out = new ArrayList<>();
 			AttributedStringBuilder builder = new AttributedStringBuilder();
 			builder.append("?", AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.GREEN).bold());
 			builder.append(" ");
 			builder.append(context.getName(), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.WHITE).bold());
 			builder.append(" ");
 
-			if (context.isResult()) {
-				builder.append(context.getValue(), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
+			if (context.getResultValue() != null) {
+				builder.append(context.getResultValue().toString(), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
 			}
 			else  {
-				String filter = context.getFilter();
+				String input = context.getInput();
+				if (StringUtils.hasText(input)) {
+					builder.append(input);
+				}
+			}
+			out.add(builder.toAttributedString());
+
+			if (context.getResultValue() == null) {
+				builder = new AttributedStringBuilder();
+				if (StringUtils.hasText(context.getMessage())) {
+					appendMessage(builder, context.getMessage(), context.getMessageLevel());
+					out.add(builder.toAttributedString());
+				}
+			}
+
+			return out;
+		}
+
+		private static void appendMessage(AttributedStringBuilder builder, String message, MessageLevel level) {
+			if (!StringUtils.hasText(message)) {
+				return;
+			}
+			if (level == MessageLevel.ERROR) {
+				builder.append(">>> ", AttributedStyle.DEFAULT.foreground(AttributedStyle.RED));
+				builder.append(message, AttributedStyle.DEFAULT.foreground(AttributedStyle.RED));
+			}
+			else if (level == MessageLevel.WARN) {
+				builder.append(">> ", AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
+				builder.append(message, AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
+			}
+			else {
+				builder.append("> ", AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN));
+				builder.append(message, AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN));
+			}
+		}
+	}
+
+	private static class StyledFieldInputRenderer implements Function<StringInputContext, List<AttributedString>> {
+
+		@Override
+		public List<AttributedString> apply(StringInputContext context) {
+			AttributedStringBuilder builder = new AttributedStringBuilder();
+			builder.append("?", AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.GREEN).bold());
+			builder.append(" ");
+			builder.append(context.getName(), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.WHITE).bold());
+			builder.append(" ");
+
+			if (context.getResultValue() != null) {
+				builder.append(context.getResultValue(), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
+			}
+			else  {
+				String filter = context.getInput();
 				if (StringUtils.hasText(filter)) {
 					builder.append(filter);
 				}
@@ -292,10 +360,11 @@ public class GenerateCommands extends AbstractInitializrCommands {
 		}
 	}
 
-	private static class StyledSingleItemSelectorRenderer<T extends Nameable & Matchable> implements Function<SingleItemSelectorContext<T>, List<AttributedString>> {
+	private static class StyledSingleItemSelectorRenderer<T, I extends SelectorItem<T>> implements
+			Function<SingleItemSelectorContext<T, I>, List<AttributedString>> {
 
 		@Override
-		public List<AttributedString> apply(SingleItemSelectorContext<T> context) {
+		public List<AttributedString> apply(SingleItemSelectorContext<T, I> context) {
 			List<AttributedString> out = new ArrayList<>();
 			AttributedStringBuilder titleBuilder = new AttributedStringBuilder();
 			titleBuilder.append("?", AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.GREEN).bold());
@@ -304,11 +373,13 @@ public class GenerateCommands extends AbstractInitializrCommands {
 			titleBuilder.append(" ");
 
 			if (context.isResult()) {
-				titleBuilder.append(context.getValue(), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
-				out.add(titleBuilder.toAttributedString());
+				if (context.getResultItem().isPresent()) {
+					titleBuilder.append(context.getValue().orElse("<none>"), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
+					out.add(titleBuilder.toAttributedString());
+				}
 			}
 			else {
-				String filterStr = StringUtils.hasText(context.getFilter()) ? ", filtering '" + context.getFilter() + "'" : ", type to filter";
+				String filterStr = StringUtils.hasText(context.getInput()) ? ", filtering '" + context.getInput() + "'" : ", type to filter";
 				titleBuilder.append(String.format("[Use arrows to move%s]", filterStr),
 						AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
 				out.add(titleBuilder.toAttributedString());
@@ -328,10 +399,11 @@ public class GenerateCommands extends AbstractInitializrCommands {
 		}
 	}
 
-	private static class StyledMultiItemSelectorRenderer<T extends Nameable & Matchable> implements Function<MultiItemSelectorContext<T>, List<AttributedString>> {
+	private static class StyledMultiItemSelectorRenderer<T, I extends SelectorItem<T>>
+			implements Function<MultiItemSelectorContext<T, I>, List<AttributedString>> {
 
 		@Override
-		public List<AttributedString> apply(MultiItemSelectorContext<T> context) {
+		public List<AttributedString> apply(MultiItemSelectorContext<T, I> context) {
 			List<AttributedString> out = new ArrayList<>();
 			AttributedStringBuilder titleBuilder = new AttributedStringBuilder();
 			titleBuilder.append("?", AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.GREEN).bold());
@@ -345,7 +417,7 @@ public class GenerateCommands extends AbstractInitializrCommands {
 				out.add(titleBuilder.toAttributedString());
 			}
 			else {
-				String filterStr = StringUtils.hasText(context.getFilter()) ? ", filtering '" + context.getFilter() + "'" : ", type to filter";
+				String filterStr = StringUtils.hasText(context.getInput()) ? ", filtering '" + context.getInput() + "'" : ", type to filter";
 				titleBuilder.append(String.format("[Use arrows to move%s]", filterStr),
 						AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
 				out.add(titleBuilder.toAttributedString());

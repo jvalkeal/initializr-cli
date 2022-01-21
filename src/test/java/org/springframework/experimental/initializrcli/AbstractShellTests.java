@@ -140,6 +140,7 @@ public abstract class AbstractShellTests {
         }
 
         public TestBuffer append(final int i) {
+            // consoleOut.reset();
             out.write((byte) i);
             return this;
         }

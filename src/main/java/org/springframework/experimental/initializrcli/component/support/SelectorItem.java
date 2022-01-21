@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.experimental.initializrcli.component;
+package org.springframework.experimental.initializrcli.component.support;
 
 import org.springframework.util.StringUtils;
 
-public interface SelectorItem<T> extends Nameable, Matchable, Enableable {
-
-	T getItem();
+public interface SelectorItem<T> extends Nameable, Matchable, Enableable, Itemable<T> {
 
 	static <T> SelectorItem<T> of(String name, T item) {
 		return of(name, item, true);

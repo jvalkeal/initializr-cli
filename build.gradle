@@ -20,6 +20,7 @@ ext {
 	set('springShellVersion', '3.0.0-SNAPSHOT')
 	set('jarchivelibVersion', '1.2.0')
 	set('initializrVersion', '0.11.1')
+	set('jimfsVersion', '1.2')
 }
 
 configurations.all {
@@ -33,12 +34,14 @@ dependencies {
 	implementation 'io.spring.initializr:initializr-generator'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.awaitility:awaitility'
+	testImplementation 'com.google.jimfs:jimfs'
 }
 
 dependencyManagement {
 	dependencies {
 		dependency "org.springframework.shell:spring-shell-starter:${springShellVersion}"
 		dependency "org.rauschig:jarchivelib:${jarchivelibVersion}"
+		dependency "com.google.jimfs:jimfs:${jimfsVersion}"
 	}
 	imports {
 		mavenBom "io.spring.initializr:initializr-bom:${initializrVersion}"

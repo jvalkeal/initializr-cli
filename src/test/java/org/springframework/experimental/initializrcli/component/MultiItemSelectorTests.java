@@ -18,7 +18,6 @@ package org.springframework.experimental.initializrcli.component;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,12 +30,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.experimental.initializrcli.AbstractShellTests;
+import org.springframework.experimental.initializrcli.component.context.ComponentContext;
+import org.springframework.experimental.initializrcli.component.support.SelectorItem;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.experimental.initializrcli.ShellAssertions.assertStringOrderThat;
 
-public class DefaultSingleItemSelectorTests extends AbstractShellTests {
+public class MultiItemSelectorTests extends AbstractShellTests {
 
 	private static SimplePojo SIMPLE_POJO_1 = SimplePojo.of("data1");
 	private static SimplePojo SIMPLE_POJO_2 = SimplePojo.of("data2");
@@ -44,16 +45,18 @@ public class DefaultSingleItemSelectorTests extends AbstractShellTests {
 	private static SimplePojo SIMPLE_POJO_4 = SimplePojo.of("data4");
 	private static SimplePojo SIMPLE_POJO_5 = SimplePojo.of("data5");
 	private static SimplePojo SIMPLE_POJO_6 = SimplePojo.of("data6");
+	private static SimplePojo SIMPLE_POJO_7 = SimplePojo.of("data7");
 	private static SelectorItem<SimplePojo> SELECTOR_ITEM_1 = SelectorItem.of("simplePojo1", SIMPLE_POJO_1);
 	private static SelectorItem<SimplePojo> SELECTOR_ITEM_2 = SelectorItem.of("simplePojo2", SIMPLE_POJO_2);
 	private static SelectorItem<SimplePojo> SELECTOR_ITEM_3 = SelectorItem.of("simplePojo3", SIMPLE_POJO_3);
 	private static SelectorItem<SimplePojo> SELECTOR_ITEM_4 = SelectorItem.of("simplePojo4", SIMPLE_POJO_4);
 	private static SelectorItem<SimplePojo> SELECTOR_ITEM_5 = SelectorItem.of("simplePojo5", SIMPLE_POJO_5);
 	private static SelectorItem<SimplePojo> SELECTOR_ITEM_6 = SelectorItem.of("simplePojo6", SIMPLE_POJO_6);
+	private static SelectorItem<SimplePojo> SELECTOR_ITEM_7 = SelectorItem.of("simplePojo7", SIMPLE_POJO_7, false);
 
 	private ExecutorService service;
 	private CountDownLatch latch;
-	private AtomicReference<Optional<SelectorItem<SimplePojo>>> result;
+	private AtomicReference<List<SelectorItem<SimplePojo>>> result;
 
 	@BeforeEach
 	public void setupMulti() {
@@ -90,7 +93,28 @@ public class DefaultSingleItemSelectorTests extends AbstractShellTests {
 	}
 
 	@Test
-	public void testSelectFirst() throws InterruptedException {
+	public void testItemsShownWithDisabled() {
+		scheduleSelect(Arrays.asList(SELECTOR_ITEM_1, SELECTOR_ITEM_7));
+		await().atMost(Duration.ofSeconds(4))
+				.untilAsserted(() -> assertStringOrderThat(consoleOut()).containsInOrder("[ ] simplePojo1", "    simplePojo7"));
+	}
+
+	@Test
+	public void testDisableIsNotSelectable() throws InterruptedException {
+		scheduleSelect(Arrays.asList(SELECTOR_ITEM_1, SELECTOR_ITEM_7));
+		TestBuffer testBuffer = new TestBuffer().space().ctrlE().space().cr();
+		write(testBuffer.getBytes());
+
+		awaitLatch();
+
+		List<SelectorItem<SimplePojo>> selected = result.get();
+		assertThat(selected).hasSize(1);
+		Stream<String> datas = selected.stream().map(SelectorItem::getItem).map(SimplePojo::getData);
+		assertThat(datas).containsExactlyInAnyOrder("data1");
+	}
+
+	@Test
+	public void testNoneSelected() throws InterruptedException {
 		scheduleSelect();
 
 		TestBuffer testBuffer = new TestBuffer().cr();
@@ -98,38 +122,67 @@ public class DefaultSingleItemSelectorTests extends AbstractShellTests {
 
 		awaitLatch();
 
-		Optional<SelectorItem<SimplePojo>> selected = result.get();
-		assertThat(selected).isNotEmpty();
+		List<SelectorItem<SimplePojo>> selected = result.get();
+		assertThat(selected).hasSize(0);
+	}
+
+	@Test
+	public void testSelectFirst() throws InterruptedException {
+		scheduleSelect();
+
+		TestBuffer testBuffer = new TestBuffer().space().cr();
+		write(testBuffer.getBytes());
+
+		awaitLatch();
+
+		List<SelectorItem<SimplePojo>> selected = result.get();
+		assertThat(selected).hasSize(1);
 		Stream<String> datas = selected.stream().map(SelectorItem::getItem).map(SimplePojo::getData);
 		assertThat(datas).containsExactlyInAnyOrder("data1");
+		assertThat(consoleOut()).contains("testSimple data1");
 	}
 
 	@Test
 	public void testSelectSecond() throws InterruptedException {
 		scheduleSelect();
 
-		TestBuffer testBuffer = new TestBuffer().ctrlE().cr();
+		TestBuffer testBuffer = new TestBuffer().ctrlE().space().cr();
 		write(testBuffer.getBytes());
 
 		awaitLatch();
 
-		Optional<SelectorItem<SimplePojo>> selected = result.get();
-		assertThat(selected).isNotEmpty();
+		List<SelectorItem<SimplePojo>> selected = result.get();
+		assertThat(selected).hasSize(1);
 		Stream<String> datas = selected.stream().map(SelectorItem::getItem).map(SimplePojo::getData);
 		assertThat(datas).containsExactlyInAnyOrder("data2");
+	}
+
+	@Test
+	public void testSelectSecondAndFourth() throws InterruptedException {
+		scheduleSelect();
+
+		TestBuffer testBuffer = new TestBuffer().ctrlE().space().ctrlE().ctrlE().space().cr();
+		write(testBuffer.getBytes());
+
+		awaitLatch();
+
+		List<SelectorItem<SimplePojo>> selected = result.get();
+		assertThat(selected).hasSize(2);
+		Stream<String> datas = selected.stream().map(SelectorItem::getItem).map(SimplePojo::getData);
+		assertThat(datas).containsExactlyInAnyOrder("data2", "data4");
 	}
 
 	@Test
 	public void testSelectLastBackwards() throws InterruptedException {
 		scheduleSelect();
 
-		TestBuffer testBuffer = new TestBuffer().ctrlY().cr();
+		TestBuffer testBuffer = new TestBuffer().ctrlY().space().cr();
 		write(testBuffer.getBytes());
 
 		awaitLatch();
 
-		Optional<SelectorItem<SimplePojo>> selected = result.get();
-		assertThat(selected).isNotEmpty();
+		List<SelectorItem<SimplePojo>> selected = result.get();
+		assertThat(selected).hasSize(1);
 		Stream<String> datas = selected.stream().map(SelectorItem::getItem).map(SimplePojo::getData);
 		assertThat(datas).containsExactlyInAnyOrder("data4");
 	}
@@ -144,13 +197,17 @@ public class DefaultSingleItemSelectorTests extends AbstractShellTests {
 	}
 
 	private void scheduleSelect(List<SelectorItem<SimplePojo>> items, Integer maxItems) {
-		DefaultSingleItemSelector<SelectorItem<SimplePojo>> selector = new DefaultSingleItemSelector<>(getTerminal(),
+		// SelectorItem<String> of1 = SelectorItem.of("name", "item");
+		// SelectorItem<SimplePojo> of2 = SelectorItem.of("name", new SimplePojo("data"));
+		MultiItemSelector<SimplePojo, SelectorItem<SimplePojo>> selector = new MultiItemSelector<>(getTerminal(),
 				items, "testSimple", null);
+		selector.setPrintResults(true);
 		if (maxItems != null) {
 			selector.setMaxItems(maxItems);
 		}
 		service.execute(() -> {
-			result.set(selector.select());
+			ComponentContext<?> context = ComponentContext.empty();
+			result.set(selector.run(context).getResultItems());
 			latch.countDown();
 		});
 	}
@@ -172,6 +229,11 @@ public class DefaultSingleItemSelectorTests extends AbstractShellTests {
 
 		static SimplePojo of(String data) {
 			return new SimplePojo(data);
+		}
+
+		@Override
+		public String toString() {
+			return data;
 		}
 	}
 }

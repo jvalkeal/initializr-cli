@@ -15,10 +15,7 @@
  */
 package org.springframework.experimental.initializrcli.command;
 
-import java.util.Collections;
 import java.util.stream.Stream;
-
-import io.spring.initializr.generator.version.VersionParser;
 
 import org.springframework.experimental.initializrcli.client.model.Metadata;
 import org.springframework.experimental.initializrcli.support.InitializrUtils;
@@ -34,8 +31,6 @@ import org.springframework.util.StringUtils;
 
 @ShellComponent
 public class ServerCommands extends AbstractInitializrCommands {
-
-	private final static VersionParser VERSION_PARSER_INSTANCE = new VersionParser(Collections.emptyList());
 
 	@ShellMethod(key = "server info", value = "Show the Initializr server being used")
 	public String info() {
