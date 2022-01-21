@@ -71,7 +71,7 @@ public class PathInputTests extends AbstractShellTests {
 
 	@Test
 	public void testResultUserInput() throws InterruptedException, IOException {
-		Path path = fileSystem.getPath("/test");
+		Path path = fileSystem.getPath("tmp");
 		Files.createDirectories(path);
 		ComponentContext<?> empty = ComponentContext.empty();
 		PathInput component1 = new PathInput(getTerminal(), "component1");
@@ -83,7 +83,7 @@ public class PathInputTests extends AbstractShellTests {
 			latch1.countDown();
 		});
 
-		TestBuffer testBuffer = new TestBuffer().append("/test").cr();
+		TestBuffer testBuffer = new TestBuffer().append("tmp").cr();
 		write(testBuffer.getBytes());
 
 		latch1.await(2, TimeUnit.SECONDS);
@@ -91,8 +91,8 @@ public class PathInputTests extends AbstractShellTests {
 
 		assertThat(run1Context).isNotNull();
 		// TODO: console out is mixed up
-		// assertThat(consoleOut()).contains("/test");
+		// assertThat(consoleOut()).contains("tmp");
 		assertThat(run1Context.getResultValue()).isNotNull();
-		assertThat(run1Context.getResultValue().toString()).contains("/test");
+		assertThat(run1Context.getResultValue().toString()).contains("tmp");
 	}
 }
