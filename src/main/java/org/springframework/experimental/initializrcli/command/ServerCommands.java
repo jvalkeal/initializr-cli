@@ -32,12 +32,12 @@ import org.springframework.util.StringUtils;
 @ShellComponent
 public class ServerCommands extends AbstractInitializrCommands {
 
-	@ShellMethod(key = "server info", value = "Show the Initializr server being used")
+	@ShellMethod(key = "info", value = "Show the Initializr server being used")
 	public String info() {
 		return client.info();
 	}
 
-	@ShellMethod(key = "server dependencies", value = "List supported dependencies")
+	@ShellMethod(key = "dependencies", value = "List supported dependencies")
 	public Table dependencies(
 		@ShellOption(help = "Search string to limit results", defaultValue = ShellOption.NULL) String search,
 		@ShellOption(help = "Limit to compatibility version", defaultValue = ShellOption.NULL) String version

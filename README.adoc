@@ -37,38 +37,35 @@ initializr:>help
 AVAILABLE COMMANDS
 
 Built-In Commands
-        clear: Clear the shell screen.
-        exit, quit: Exit the shell.
+        completion bash: Generate bash completion script
         help: Display help about available commands.
         history: Display or save the history of previously run commands
         script: Read and execute commands from a file.
-        stacktrace: Display the full stacktrace of the last error.
+        version: Show version info
 
-Generate Commands
+Initializr Commands
+        dependencies: List supported dependencies
+        info: Show the Initializr server being used
         init: Initialize project
-
-Server Commands
-        server dependencies: List supported dependencies
-        server info: Show the Initializr server being used
 ```
 
 === Listing dependencies
 
 ```
-initializr:>help --command "server dependencies"
-
-
 NAME
-	server dependencies - List supported dependencies
+	dependencies - List supported dependencies
 
 SYNOPSYS
-	server dependencies [[--search] string]
+	dependencies [[--search] string]  [[--version] string]
 
 OPTIONS
 	--search  string
 		Search string to limit results
 		[Optional, default = <none>]
 
+	--version  string
+		Limit to compatibility version
+		[Optional, default = <none>]
 ```
 
 === Generating a project
@@ -147,20 +144,16 @@ With native:
 ```
 ./build/native/nativeCompile/initializr-cli help
 Built-In Commands
-        clear: Clear the shell screen.
         completion bash: Generate bash completion script
-        exit, quit: Exit the shell.
         help: Display help about available commands.
         history: Display or save the history of previously run commands
         script: Read and execute commands from a file.
-        stacktrace: Display the full stacktrace of the last error.
+        version: Show version info
 
-Generate Commands
+Initializr Commands
+        dependencies: List supported dependencies
+        info: Show the Initializr server being used
         init: Initialize project
-
-Server Commands
-        server dependencies: List supported dependencies
-        server info: Show the Initializr server being used
 ```
 
 With jar:
@@ -170,20 +163,16 @@ $ java -jar build/libs/initializr-cli-0.0.1-SNAPSHOT.jar help
 AVAILABLE COMMANDS
 
 Built-In Commands
-        clear: Clear the shell screen.
         completion bash: Generate bash completion script
-        exit, quit: Exit the shell.
         help: Display help about available commands.
         history: Display or save the history of previously run commands
         script: Read and execute commands from a file.
-        stacktrace: Display the full stacktrace of the last error.
+        version: Show version info
 
-Generate Commands
+Initializr Commands
+        dependencies: List supported dependencies
+        info: Show the Initializr server being used
         init: Initialize project
-
-Server Commands
-        server dependencies: List supported dependencies
-        server info: Show the Initializr server being used
 ```
 
 === Shell Completion
