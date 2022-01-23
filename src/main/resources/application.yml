@@ -6,6 +6,9 @@ spring:
     command:
       completion:
         root-command: initializr-cli
+      version:
+        show-git-short-commit-id: true
+
 ## disable console logging
 logging:
   pattern:
