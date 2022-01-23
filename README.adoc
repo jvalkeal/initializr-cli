@@ -185,10 +185,7 @@ $ source <(initializr-cli completion bash)
 
 == Demos
 
-Generate project:
+Init Project:
 
-image::https://asciinema.org/a/JYxbnmbvEJTF1sFA3o5FGVCJW.svg[asciicast,link="https://asciinema.org/a/JYxbnmbvEJTF1sFA3o5FGVCJW"]
+image::https://asciinema.org/a/5BJsIgqEWPlPv8J5pqowXsMVx.svg[asciicast,link="https://asciinema.org/a/5BJsIgqEWPlPv8J5pqowXsMVx"]
 
-List dependencies from a server:
-
-image::https://asciinema.org/a/g85jSakIuz3bz9uQcUKNCkA3T.svg[asciicast,link="https://asciinema.org/a/g85jSakIuz3bz9uQcUKNCkA3T"]
