@@ -7,29 +7,29 @@ on:
       - '.github/**'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        java: [ '11', '17' ]
-    name: CI Build ${{ matrix.java }}
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-java@v2
-        with:
-          distribution: adopt
-          java-version: ${{ matrix.java }}
-          cache: gradle
-      - run: ./gradlew build --no-daemon
+  # build:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       java: [ '11', '17' ]
+  #   name: CI Build ${{ matrix.java }}
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-java@v2
+  #       with:
+  #         distribution: adopt
+  #         java-version: ${{ matrix.java }}
+  #         cache: gradle
+  #     - run: ./gradlew build --no-daemon
   native:
-    needs: [build]
+    # needs: [build]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         version: ['21.3.0']
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [windows-latest]
     name: CI Native ${{ matrix.version }} on ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -45,17 +45,17 @@ jobs:
           components: native-image
           set-java-home: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - run: ./gradlew build nativeCompile --no-daemon
-      - uses: actions/upload-artifact@v2
-        with:
-          name: initializr-cli-${{ matrix.os }}-${{ matrix.version }}
-          path: build/native/nativeCompile/
-          retention-days: 1
+      # - run: ./gradlew build nativeCompile --no-daemon
+      # - uses: actions/upload-artifact@v2
+      #   with:
+      #     name: initializr-cli-${{ matrix.os }}-${{ matrix.version }}
+      #     path: build/native/nativeCompile/
+      #     retention-days: 1
       - name: Run Commands (linux/macos)
         run: |
           build/native/nativeCompile/initializr-cli help
         if: runner.os != 'Windows'
       - name: Run Commands (windows)
         run: |
-          build/native/nativeCompile/initializr-cli.exe help
+          Get-ChildItem env:
         if: runner.os == 'Windows'
