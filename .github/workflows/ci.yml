@@ -2,6 +2,9 @@ name: CI
 
 on:
   workflow_dispatch:
+  push:
+    paths-ignore:
+      - '.github/**'
 
 jobs:
   # build:
@@ -42,12 +45,17 @@ jobs:
           components: native-image
           set-java-home: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      # - run: ./gradlew build nativeCompile --no-daemon
-      # - uses: actions/upload-artifact@v2
-      #   with:
-      #     name: initializr-cli-${{ matrix.os }}-${{ matrix.version }}
-      #     path: build/native/nativeCompile/
-      #     retention-days: 1
+      - name: Native Compile (windows)
+        env:
+          TERM: windows
+        run: |
+          ./gradlew build nativeCompile --no-daemon
+        if: runner.os == 'Windows'
+      - uses: actions/upload-artifact@v2
+        with:
+          name: initializr-cli-${{ matrix.os }}-${{ matrix.version }}
+          path: build/native/nativeCompile/
+          retention-days: 1
       - name: Run Commands (linux/macos)
         run: |
           build/native/nativeCompile/initializr-cli help
