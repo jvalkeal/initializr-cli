@@ -46,8 +46,6 @@ jobs:
           set-java-home: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Native Compile (windows)
-        env:
-          TERM: windows
         run: |
           ./gradlew build nativeCompile --no-daemon
         if: runner.os == 'Windows'
