@@ -55,10 +55,10 @@ public class InitializrCliApplication {
 	public static void main(String[] args) {
 		System.setProperty("jna.debug_load", "true");
 		System.setProperty("jna.debug_load.jna", "true");
-		// String xxx1 = System.getProperty("jna.debug_load");
-		// System.out.println("XXX1 " + xxx1);
-		// boolean xxx2 = Boolean.getBoolean("jna.debug_load");
-		// System.out.println("XXX2 " + xxx2);
+		String xxx1 = System.getProperty("jna.debug_load");
+		System.out.println("XXX1 " + xxx1);
+		boolean xxx2 = Boolean.getBoolean("jna.debug_load");
+		System.out.println("XXX2 " + xxx2);
 
 		SpringApplication.run(InitializrCliApplication.class, args);
 	}
