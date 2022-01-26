@@ -1,5 +1,6 @@
 [
   ["com.sun.jna.Library"],
   ["com.sun.jna.Callback"],
-  ["org.jline.terminal.impl.jna.linux.CLibrary"]
+  ["org.jline.terminal.impl.jna.linux.CLibrary"],
+  ["org.jline.terminal.impl.jna.win.Kernel32"]
 ]

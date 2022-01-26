@@ -8,7 +8,7 @@ import org.springframework.nativex.hint.NativeHint;
 import org.springframework.nativex.type.NativeConfiguration;
 
 @NativeHint(
-	options = { "-Djna.debug_load=true", "-Djna.debug_load.jna=true" },
+	options = { "-Djna.debug_load=true", "-Djna.debug_load.jna=true", "-H:Log=registerResource:3" },
 	initialization = @InitializationHint(
 		// types = { Native.class },
 		// typeNames = { "com.sun.jna.Native" },
