@@ -42,19 +42,19 @@ import org.springframework.nativex.hint.ResourceHint;
 import org.springframework.nativex.hint.TypeAccess;
 import org.springframework.nativex.hint.TypeHint;
 
-@TypeHint(types = {
-		ArtifactId.class, BootVersion.class, Dependencies.class, Dependency.class, DependencyCategory.class,
-		Description.class, GroupId.class, IdName.class, JavaVersion.class, JavaVersionValues.class, Language.class,
-		LanguageValues.class, Metadata.class, Name.class, PackageName.class, Packaging.class, PackagingValues.class,
-		ProjectType.class, ProjectTypeValue.class, Version.class
-}, access = { TypeAccess.PUBLIC_CLASSES, TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.PUBLIC_FIELDS,
-		TypeAccess.PUBLIC_METHODS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
-		TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS })
-@ResourceHint(patterns = {
-	"completion/.*",
-	"template/.*.st",
-	"com/sun/jna/win32-x86-64/jnidispatch.dll"
-})
+// @TypeHint(types = {
+// 		ArtifactId.class, BootVersion.class, Dependencies.class, Dependency.class, DependencyCategory.class,
+// 		Description.class, GroupId.class, IdName.class, JavaVersion.class, JavaVersionValues.class, Language.class,
+// 		LanguageValues.class, Metadata.class, Name.class, PackageName.class, Packaging.class, PackagingValues.class,
+// 		ProjectType.class, ProjectTypeValue.class, Version.class
+// }, access = { TypeAccess.PUBLIC_CLASSES, TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.PUBLIC_FIELDS,
+// 		TypeAccess.PUBLIC_METHODS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+// 		TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS })
+// @ResourceHint(patterns = {
+// 	"completion/.*",
+// 	"template/.*.st",
+// 	"com/sun/jna/win32-x86-64/jnidispatch.dll"
+// })
 @SpringBootApplication
 public class InitializrCliApplication {
 
