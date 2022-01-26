@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['21.3.0']
+        version: ['22.0.0.2']
         os: [windows-latest]
     name: CI Native ${{ matrix.version }} on ${{ matrix.os }}
     steps:

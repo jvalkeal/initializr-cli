@@ -37,6 +37,7 @@ import org.springframework.experimental.initializrcli.client.model.Packaging.Pac
 import org.springframework.experimental.initializrcli.client.model.ProjectType;
 import org.springframework.experimental.initializrcli.client.model.ProjectType.ProjectTypeValue;
 import org.springframework.experimental.initializrcli.client.model.Version;
+import org.springframework.nativex.hint.NativeHint;
 import org.springframework.nativex.hint.TypeAccess;
 import org.springframework.nativex.hint.TypeHint;
 
@@ -52,6 +53,13 @@ import org.springframework.nativex.hint.TypeHint;
 public class InitializrCliApplication {
 
 	public static void main(String[] args) {
+		System.setProperty("jna.debug_load", "true");
+		System.setProperty("jna.debug_load.jna", "true");
+		// String xxx1 = System.getProperty("jna.debug_load");
+		// System.out.println("XXX1 " + xxx1);
+		// boolean xxx2 = Boolean.getBoolean("jna.debug_load");
+		// System.out.println("XXX2 " + xxx2);
+
 		SpringApplication.run(InitializrCliApplication.class, args);
 	}
 }
