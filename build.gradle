@@ -33,6 +33,7 @@ dependencies {
 	implementation 'org.springframework.shell:spring-shell-starter'
 	implementation 'org.rauschig:jarchivelib'
 	implementation 'io.spring.initializr:initializr-generator'
+	implementation 'org.jline:jline-terminal-jna:3.21.0'
 	compileOnly 'org.springframework.experimental:spring-aot'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.awaitility:awaitility'

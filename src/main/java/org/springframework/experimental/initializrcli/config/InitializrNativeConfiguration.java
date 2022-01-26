@@ -68,8 +68,8 @@ import com.sun.jna.Callback;
 			TypeAccess.PUBLIC_METHODS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 			TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS }),
 		jdkProxies = @JdkProxyHint(
-			types = { Library.class, Callback.class},
-			typeNames = {"org.jline.terminal.impl.jna.linux.CLibrary", "org.jline.terminal.impl.jna.win.Kernel32"}
+			// types = { Library.class, Callback.class},
+			typeNames = {"com.sun.jna.Library", "com.sun.jna.Callback", "org.jline.terminal.impl.jna.linux.CLibrary", "org.jline.terminal.impl.jna.win.Kernel32"}
 		)
 )
 public class InitializrNativeConfiguration implements NativeConfiguration {
