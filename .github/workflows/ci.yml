@@ -56,9 +56,11 @@ jobs:
           retention-days: 1
       - name: Run Commands (linux/macos)
         run: |
-          build/native/nativeCompile/initializr-cli help
+          build/native/nativeCompile/initializr-cli version
         if: runner.os != 'Windows'
       - name: Run Commands (windows)
         run: |
           Get-ChildItem env:
+          build/native/nativeCompile/initializr-cli.exe version
+          cat shell.log
         if: runner.os == 'Windows'

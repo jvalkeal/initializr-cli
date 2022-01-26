@@ -54,7 +54,7 @@ import org.springframework.nativex.type.NativeConfiguration;
 				Description.class, GroupId.class, IdName.class, JavaVersion.class, JavaVersionValues.class, Language.class,
 				LanguageValues.class, Metadata.class, Name.class, PackageName.class, Packaging.class, PackagingValues.class,
 				ProjectType.class, ProjectTypeValue.class, Version.class, CallbackReference.class, Native.class,
-				Structure.class, NativeLong.class, PointerByReference.class, IntByReference.class, Base64.Decoder.class
+				NativeLong.class, PointerByReference.class, IntByReference.class, Base64.Decoder.class
 			},
 			typeNames = { "com.sun.jna.Klass" },
 			access = {
