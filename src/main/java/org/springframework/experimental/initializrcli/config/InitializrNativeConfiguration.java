@@ -41,6 +41,7 @@ import com.sun.jna.Structure;
 import com.sun.jna.NativeLong;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
+// import org.jline.terminal.impl.jna.win.Kernel32;
 
 import com.sun.jna.Library;
 import com.sun.jna.Callback;
@@ -62,7 +63,7 @@ import com.sun.jna.Callback;
 			CallbackReference.class, Native.class, Structure.class, NativeLong.class, PointerByReference.class,
 			IntByReference.class, Base64.Decoder.class
 		},
-		typeNames = {"com.sun.jna.Klass"},
+		typeNames = {"com.sun.jna.Klass", "org.jline.terminal.impl.jna.win.Kernel32"},
 		access = {
 			TypeAccess.PUBLIC_CLASSES, TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.PUBLIC_FIELDS,
 			TypeAccess.PUBLIC_METHODS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
