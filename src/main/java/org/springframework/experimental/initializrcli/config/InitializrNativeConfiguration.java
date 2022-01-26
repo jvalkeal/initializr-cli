@@ -5,6 +5,7 @@ import java.util.Base64;
 import com.sun.jna.CallbackReference;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
+import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
@@ -29,7 +30,9 @@ import org.springframework.experimental.initializrcli.client.model.Packaging.Pac
 import org.springframework.experimental.initializrcli.client.model.ProjectType;
 import org.springframework.experimental.initializrcli.client.model.ProjectType.ProjectTypeValue;
 import org.springframework.experimental.initializrcli.client.model.Version;
+import org.springframework.nativex.hint.FieldHint;
 import org.springframework.nativex.hint.JdkProxyHint;
+import org.springframework.nativex.hint.MethodHint;
 import org.springframework.nativex.hint.NativeHint;
 import org.springframework.nativex.hint.ResourceHint;
 import org.springframework.nativex.hint.TypeAccess;
@@ -44,20 +47,40 @@ import org.springframework.nativex.type.NativeConfiguration;
 			"template/.*.st",
 			"com/sun/jna/win32-x86-64/jnidispatch.dll"
 		}),
-	types = @TypeHint(
-		types = {
-			ArtifactId.class, BootVersion.class, Dependencies.class, Dependency.class, DependencyCategory.class,
-			Description.class, GroupId.class, IdName.class, JavaVersion.class, JavaVersionValues.class, Language.class,
-			LanguageValues.class, Metadata.class, Name.class, PackageName.class, Packaging.class, PackagingValues.class,
-			ProjectType.class, ProjectTypeValue.class, Version.class, CallbackReference.class, Native.class,
-			Structure.class, NativeLong.class, PointerByReference.class, IntByReference.class, Base64.Decoder.class
-		},
-		typeNames = { "com.sun.jna.Klass" },
-		access = {
-			TypeAccess.PUBLIC_CLASSES, TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.PUBLIC_FIELDS,
-			TypeAccess.PUBLIC_METHODS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
-			TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
-		}),
+	types = {
+		@TypeHint(
+			types = {
+				ArtifactId.class, BootVersion.class, Dependencies.class, Dependency.class, DependencyCategory.class,
+				Description.class, GroupId.class, IdName.class, JavaVersion.class, JavaVersionValues.class, Language.class,
+				LanguageValues.class, Metadata.class, Name.class, PackageName.class, Packaging.class, PackagingValues.class,
+				ProjectType.class, ProjectTypeValue.class, Version.class, CallbackReference.class, Native.class,
+				Structure.class, NativeLong.class, PointerByReference.class, IntByReference.class, Base64.Decoder.class
+			},
+			typeNames = { "com.sun.jna.Klass" },
+			access = {
+				TypeAccess.PUBLIC_CLASSES, TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.PUBLIC_FIELDS,
+				TypeAccess.PUBLIC_METHODS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
+			}
+		),
+		@TypeHint(
+			types = Structure.class,
+			fields = {
+				@FieldHint( name = "memory", allowWrite = true),
+				@FieldHint( name = "typeInfo")
+			},
+			methods = {
+				@MethodHint( name = "newInstance", parameterTypes = { Class.class, Pointer.class }),
+				@MethodHint( name = "newInstance", parameterTypes = { Class.class, long.class }),
+				@MethodHint( name = "newInstance", parameterTypes = { Class.class })
+			},
+			access = {
+				TypeAccess.PUBLIC_CLASSES, TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.PUBLIC_FIELDS,
+				TypeAccess.PUBLIC_METHODS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
+			}
+		)
+	},
 	jdkProxies = {
 		@JdkProxyHint( typeNames = { "com.sun.jna.Library" }),
 		@JdkProxyHint( typeNames = { "com.sun.jna.Callback" }),
