@@ -38,6 +38,7 @@ import org.springframework.experimental.initializrcli.client.model.ProjectType;
 import org.springframework.experimental.initializrcli.client.model.ProjectType.ProjectTypeValue;
 import org.springframework.experimental.initializrcli.client.model.Version;
 import org.springframework.nativex.hint.NativeHint;
+import org.springframework.nativex.hint.ResourceHint;
 import org.springframework.nativex.hint.TypeAccess;
 import org.springframework.nativex.hint.TypeHint;
 
@@ -49,6 +50,11 @@ import org.springframework.nativex.hint.TypeHint;
 }, access = { TypeAccess.PUBLIC_CLASSES, TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.PUBLIC_FIELDS,
 		TypeAccess.PUBLIC_METHODS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 		TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS })
+@ResourceHint(patterns = {
+	"completion/.*",
+	"template/.*.st",
+	"com/sun/jna/win32-x86-64/jnidispatch.dll"
+})
 @SpringBootApplication
 public class InitializrCliApplication {
 

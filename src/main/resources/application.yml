@@ -18,6 +18,9 @@ logging:
     name: shell.log
   level:
     # root: debug
+    com:
+      sun:
+        jna: debug
     org:
       jline: debug
       springframework:
