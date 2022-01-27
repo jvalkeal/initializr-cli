@@ -359,8 +359,7 @@
       { "name" : "dwCursorPosition", "allowWrite" : true },
       { "name" : "wAttributes", "allowWrite" : true },
       { "name" : "srWindow", "allowWrite" : true },
-      { "name" : "dwMaximumWindowSize", "allowWrite" : true },
-      { "name" : "fieldOrder" }
+      { "name" : "dwMaximumWindowSize", "allowWrite" : true }
     ]
   }
 ]
