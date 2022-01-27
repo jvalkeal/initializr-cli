@@ -353,7 +353,11 @@
     "allDeclaredConstructors" : true,
     "allPublicConstructors" : true,
     "allDeclaredMethods" : true,
-    "allPublicMethods" : true
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "uChar", "allowWrite" : true },
+      { "name" : "Attributes", "allowWrite" : true }
+    ]
   },
   {
     "name" : "org.jline.terminal.impl.jna.win.Kernel32$CONSOLE_CURSOR_INFO",
@@ -385,7 +389,11 @@
     "allDeclaredConstructors" : true,
     "allPublicConstructors" : true,
     "allDeclaredMethods" : true,
-    "allPublicMethods" : true
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "X", "allowWrite" : true },
+      { "name" : "Y", "allowWrite" : true }
+    ]
   },
   {
     "name" : "org.jline.terminal.impl.jna.win.Kernel32$INPUT_RECORD",
@@ -461,7 +469,13 @@
     "allDeclaredConstructors" : true,
     "allPublicConstructors" : true,
     "allDeclaredMethods" : true,
-    "allPublicMethods" : true
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "Left", "allowWrite" : true },
+      { "name" : "Top", "allowWrite" : true },
+      { "name" : "Right", "allowWrite" : true },
+      { "name" : "Bottom", "allowWrite" : true }
+    ]
   },
   {
     "name" : "org.jline.terminal.impl.jna.linux.CLibrary$termios",
