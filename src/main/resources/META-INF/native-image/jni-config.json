@@ -347,5 +347,19 @@
     "allPublicConstructors" : true,
     "allDeclaredMethods" : true,
     "allPublicMethods" : true
+  },
+  {
+    "name" : "org.jline.terminal.impl.jna.win.Kernel32#CONSOLE_SCREEN_BUFFER_INFO",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "dwSize", "allowWrite" : true },
+      { "name" : "dwCursorPosition", "allowWrite" : true },
+      { "name" : "wAttributes", "allowWrite" : true },
+      { "name" : "srWindow", "allowWrite" : true },
+      { "name" : "dwMaximumWindowSize", "allowWrite" : true }
+    ]
   }
 ]

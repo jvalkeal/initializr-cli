@@ -79,17 +79,18 @@ import org.springframework.nativex.type.NativeConfiguration;
 				TypeAccess.PUBLIC_METHODS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
 			}
-		),
-		@TypeHint(
-			typeNames = "org.jline.terminal.impl.jna.win.Kernel32#CONSOLE_SCREEN_BUFFER_INFO",
-			fields = {
-				@FieldHint( name = "dwSize", allowWrite = true),
-				@FieldHint( name = "dwCursorPosition", allowWrite = true),
-				@FieldHint( name = "wAttributes", allowWrite = true),
-				@FieldHint( name = "srWindow", allowWrite = true),
-				@FieldHint( name = "dwMaximumWindowSize, allowWrite = true")
-			}
 		)
+		// @TypeHint(
+		// 	typeNames = "org.jline.terminal.impl.jna.win.Kernel32#CONSOLE_SCREEN_BUFFER_INFO",
+		// 	fields = {
+		// 		@FieldHint( name = "dwSize", allowWrite = true),
+		// 		@FieldHint( name = "dwCursorPosition", allowWrite = true),
+		// 		@FieldHint( name = "wAttributes", allowWrite = true),
+		// 		@FieldHint( name = "srWindow", allowWrite = true),
+		// 		@FieldHint( name = "dwMaximumWindowSize, allowWrite = true")
+		// 	},
+		// 	access = { TypeAccess.PUBLIC_FIELDS }
+		// )
 	},
 	jdkProxies = {
 		@JdkProxyHint( typeNames = { "com.sun.jna.Library" }),
