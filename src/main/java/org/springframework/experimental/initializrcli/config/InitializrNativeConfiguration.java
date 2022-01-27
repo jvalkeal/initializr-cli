@@ -85,84 +85,84 @@ import org.springframework.nativex.type.NativeConfiguration;
 		@TypeHint(
 			typeNames = "com.sun.jna.Structure$FFIType",
 			access = {
-				TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
 			}
 		),
 		@TypeHint(
 			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$CHAR_INFO",
 			access = {
-				TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
 			}
 		),
 		@TypeHint(
 			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$CONSOLE_CURSOR_INFO",
 			access = {
-				TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
 			}
 		),
 		@TypeHint(
 			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$CONSOLE_SCREEN_BUFFER_INFO",
 			access = {
-				TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
 			}
 		),
 		@TypeHint(
 			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$COORD",
 			access = {
-				TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
 			}
 		),
 		@TypeHint(
 			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$INPUT_RECORD",
 			access = {
-				TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
 			}
 		),
 		@TypeHint(
 			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$KEY_EVENT_RECORD",
 			access = {
-				TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
 			}
 		),
 		@TypeHint(
 			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$MOUSE_EVENT_RECORD",
 			access = {
-				TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
 			}
 		),
 		@TypeHint(
 			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$WINDOW_BUFFER_SIZE_RECORD",
 			access = {
-				TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
 			}
 		),
 		@TypeHint(
 			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$MENU_EVENT_RECORD",
 			access = {
-				TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
 			}
 		),
 		@TypeHint(
 			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$FOCUS_EVENT_RECORD",
 			access = {
-				TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
 			}
 		),
 		@TypeHint(
 			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$SMALL_RECT",
 			access = {
-				TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
 				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
 			}
 		),
