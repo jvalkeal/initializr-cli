@@ -349,7 +349,7 @@
     "allPublicMethods" : true
   },
   {
-    "name" : "org.jline.terminal.impl.jna.win.Kernel32#CONSOLE_SCREEN_BUFFER_INFO",
+    "name" : "org.jline.terminal.impl.jna.win.Kernel32$CONSOLE_SCREEN_BUFFER_INFO",
     "allDeclaredConstructors" : true,
     "allPublicConstructors" : true,
     "allDeclaredMethods" : true,
