@@ -414,6 +414,20 @@
     ]
   },
   {
+    "name" : "org.jline.terminal.impl.jna.win.Kernel32$INPUT_RECORD$EventUnion",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "KeyEvent", "allowWrite" : true },
+      { "name" : "MouseEvent", "allowWrite" : true },
+      { "name" : "WindowBufferSizeEvent", "allowWrite" : true },
+      { "name" : "MenuEvent", "allowWrite" : true },
+      { "name" : "FocusEvent", "allowWrite" : true }
+    ]
+  },
+  {
     "name" : "org.jline.terminal.impl.jna.win.Kernel32$KEY_EVENT_RECORD",
     "allDeclaredConstructors" : true,
     "allPublicConstructors" : true,
