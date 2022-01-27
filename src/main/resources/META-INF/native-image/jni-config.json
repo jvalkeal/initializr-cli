@@ -349,6 +349,24 @@
     "allPublicMethods" : true
   },
   {
+    "name" : "org.jline.terminal.impl.jna.win.Kernel32$CHAR_INFO",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true
+  },
+  {
+    "name" : "org.jline.terminal.impl.jna.win.Kernel32$CONSOLE_CURSOR_INFO",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "dwSize", "allowWrite" : true },
+      { "name" : "bVisible", "allowWrite" : true }
+    ]
+  },
+  {
     "name" : "org.jline.terminal.impl.jna.win.Kernel32$CONSOLE_SCREEN_BUFFER_INFO",
     "allDeclaredConstructors" : true,
     "allPublicConstructors" : true,
@@ -363,7 +381,108 @@
     ]
   },
   {
-    "name" : "org.springframework.experimental.initializrcli.InitializrCliApplication$termios",
-    "allDeclaredFields" : true
+    "name" : "org.jline.terminal.impl.jna.win.Kernel32$COORD",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true
+  },
+  {
+    "name" : "org.jline.terminal.impl.jna.win.Kernel32$INPUT_RECORD",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "EventType", "allowWrite" : true },
+      { "name" : "Event", "allowWrite" : true }
+    ]
+  },
+  {
+    "name" : "org.jline.terminal.impl.jna.win.Kernel32$KEY_EVENT_RECORD",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "bKeyDown", "allowWrite" : true },
+      { "name" : "wRepeatCount", "allowWrite" : true },
+      { "name" : "wVirtualKeyCode", "allowWrite" : true },
+      { "name" : "wVirtualScanCode", "allowWrite" : true },
+      { "name" : "uChar", "allowWrite" : true },
+      { "name" : "dwControlKeyState", "allowWrite" : true }
+    ]
+  },
+  {
+    "name" : "org.jline.terminal.impl.jna.win.Kernel32$MOUSE_EVENT_RECORD",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "dwMousePosition", "allowWrite" : true },
+      { "name" : "dwButtonState", "allowWrite" : true },
+      { "name" : "dwControlKeyState", "allowWrite" : true },
+      { "name" : "dwEventFlags", "allowWrite" : true }
+    ]
+  },
+  {
+    "name" : "org.jline.terminal.impl.jna.win.Kernel32$WINDOW_BUFFER_SIZE_RECORD",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "dwSize", "allowWrite" : true }
+    ]
+  },
+  {
+    "name" : "org.jline.terminal.impl.jna.win.Kernel32$MENU_EVENT_RECORD",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "dwCommandId", "allowWrite" : true }
+    ]
+  },
+  {
+    "name" : "org.jline.terminal.impl.jna.win.Kernel32$FOCUS_EVENT_RECORD",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "bSetFocus", "allowWrite" : true }
+    ]
+  },
+  {
+    "name" : "org.jline.terminal.impl.jna.win.Kernel32$SMALL_RECT",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true
+  },
+  {
+    "name" : "org.jline.terminal.impl.jna.linux.CLibrary$termios",
+    "fields" : [
+      { "name" : "c_iflag", "allowWrite" : true },
+      { "name" : "c_oflag", "allowWrite" : true },
+      { "name" : "c_cflag", "allowWrite" : true },
+      { "name" : "c_lflag", "allowWrite" : true },
+      { "name" : "c_line", "allowWrite" : true },
+      { "name" : "c_cc", "allowWrite" : true },
+      { "name" : "c_ispeed", "allowWrite" : true },
+      { "name" : "c_ospeed", "allowWrite" : true }
+    ]
+  },
+  {
+    "name" : "org.jline.terminal.impl.jna.linux.CLibrary$winsize",
+    "fields" : [
+      { "name" : "ws_row", "allowWrite" : true },
+      { "name" : "ws_col", "allowWrite" : true },
+      { "name" : "ws_xpixel", "allowWrite" : true },
+      { "name" : "ws_ypixel", "allowWrite" : true }
+    ]
   }
 ]
