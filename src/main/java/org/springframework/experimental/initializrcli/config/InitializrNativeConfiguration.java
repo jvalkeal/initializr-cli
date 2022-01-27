@@ -90,6 +90,13 @@ import org.springframework.nativex.type.NativeConfiguration;
 			}
 		),
 		@TypeHint(
+			typeNames = "com.sun.jna.Structure$FFIType$size_t",
+			access = {
+				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
+			}
+		),
+		@TypeHint(
 			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$CHAR_INFO",
 			access = {
 				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
