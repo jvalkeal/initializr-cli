@@ -46,7 +46,8 @@ import org.springframework.nativex.type.NativeConfiguration;
 		patterns = {
 			"completion/.*",
 			"template/.*.st",
-			"com/sun/jna/win32-x86-64/jnidispatch.dll"
+			"com/sun/jna/win32-x86-64/jnidispatch.dll",
+			"com/sun/jna/linux-x86-64/libjnidispatch.so"
 		}),
 	types = {
 		@TypeHint(
@@ -82,21 +83,26 @@ import org.springframework.nativex.type.NativeConfiguration;
 			}
 		),
 		// @TypeHint(
-		// 	typeNames = "org.jline.terminal.impl.jna.win.Kernel32$CONSOLE_SCREEN_BUFFER_INFO",
-		// 	// fields = {
-		// 	// 	@FieldHint( name = "dwSize", allowWrite = true),
-		// 	// 	@FieldHint( name = "dwCursorPosition", allowWrite = true),
-		// 	// 	@FieldHint( name = "wAttributes", allowWrite = true),
-		// 	// 	@FieldHint( name = "srWindow", allowWrite = true),
-		// 	// 	@FieldHint( name = "dwMaximumWindowSize, allowWrite = true")
-		// 	// },
-		// 	access = { TypeAccess.PUBLIC_FIELDS , TypeAccess.DECLARED_METHODS }
+		// 	typeNames = { "org.springframework.experimental.initializrcli.InitializrCliApplication$termios" },
+		// 	access = { TypeAccess.DECLARED_FIELDS }
 		// )
+		@TypeHint(
+			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$CONSOLE_SCREEN_BUFFER_INFO",
+			// fields = {
+			// 	@FieldHint( name = "dwSize", allowWrite = true),
+			// 	@FieldHint( name = "dwCursorPosition", allowWrite = true),
+			// 	@FieldHint( name = "wAttributes", allowWrite = true),
+			// 	@FieldHint( name = "srWindow", allowWrite = true),
+			// 	@FieldHint( name = "dwMaximumWindowSize, allowWrite = true")
+			// },
+			access = { TypeAccess.DECLARED_FIELDS }
+		)
 	},
 	jdkProxies = {
 		@JdkProxyHint( typeNames = { "com.sun.jna.Library" }),
 		@JdkProxyHint( typeNames = { "com.sun.jna.Callback" }),
-		@JdkProxyHint( typeNames = { "org.jline.terminal.impl.jna.win.Kernel32" })
+		@JdkProxyHint( typeNames = { "org.jline.terminal.impl.jna.win.Kernel32" }),
+		@JdkProxyHint( typeNames = { "org.jline.terminal.impl.jna.linux.CLibrary" })
 	}
 )
 public class InitializrNativeConfiguration implements NativeConfiguration {
