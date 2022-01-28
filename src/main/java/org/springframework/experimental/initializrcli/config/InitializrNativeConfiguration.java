@@ -132,6 +132,13 @@ import org.springframework.nativex.type.NativeConfiguration;
 			}
 		),
 		@TypeHint(
+			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$INPUT_RECORD$EventUnion",
+			access = {
+				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
+				TypeAccess.DECLARED_FIELDS, TypeAccess.DECLARED_METHODS
+			}
+		),
+		@TypeHint(
 			typeNames = "org.jline.terminal.impl.jna.win.Kernel32$KEY_EVENT_RECORD",
 			access = {
 				TypeAccess.PUBLIC_CONSTRUCTORS, TypeAccess.DECLARED_CLASSES, TypeAccess.DECLARED_CONSTRUCTORS,
