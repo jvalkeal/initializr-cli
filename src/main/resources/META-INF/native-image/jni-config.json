@@ -499,6 +499,17 @@
     ]
   },
   {
+    "name" : "org.jline.terminal.impl.jna.win.Kernel32$UnionChar",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "fields" : [
+      { "name" : "UnicodeChar", "allowWrite" : true },
+      { "name" : "AsciiChar", "allowWrite" : true }
+    ]
+  },
+  {
     "name" : "org.jline.terminal.impl.jna.linux.CLibrary$termios",
     "fields" : [
       { "name" : "c_iflag", "allowWrite" : true },
