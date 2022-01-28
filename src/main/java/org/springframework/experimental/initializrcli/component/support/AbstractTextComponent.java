@@ -21,12 +21,14 @@ import java.util.function.Function;
 import org.jline.keymap.KeyMap;
 import org.jline.terminal.Terminal;
 import org.jline.utils.AttributedString;
+import org.jline.utils.InfoCmp.Capability;
 
 import org.springframework.experimental.initializrcli.component.context.BaseComponentContext;
 import org.springframework.experimental.initializrcli.component.context.ComponentContext;
 import org.springframework.experimental.initializrcli.component.support.AbstractTextComponent.TextComponentContext;
 
 import static org.jline.keymap.KeyMap.del;
+import static org.jline.keymap.KeyMap.key;
 
 /**
  * Base class for components which work on a simple text input.
@@ -54,7 +56,7 @@ public abstract class AbstractTextComponent<T, C extends TextComponentContext<T,
 	@Override
 	protected void bindKeyMap(KeyMap<String> keyMap) {
 		keyMap.bind(OPERATION_EXIT, "\r");
-		keyMap.bind(OPERATION_BACKSPACE, del());
+		keyMap.bind(OPERATION_BACKSPACE, del(), key(getTerminal(), Capability.key_backspace));
 		// skip 127 - DEL
 		for (char i = 32; i < KeyMap.KEYMAP_LENGTH - 1; i++) {
 			keyMap.bind(OPERATION_CHAR, Character.toString(i));
