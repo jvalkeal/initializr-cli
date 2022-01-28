@@ -130,7 +130,7 @@ public abstract class AbstractComponent<T extends ComponentContext<T>> {
 	 * @return a context
 	 */
 	public final T run(ComponentContext<?> context) {
-		bindKeyMap(keyMap);
+		bindKeyMap(keyMap, terminal);
 		context = runPreRunHandlers(getThisContext(context));
 		T run = runInternal(getThisContext(context));
 		context = runPostRunHandlers(getThisContext(context));
@@ -169,9 +169,10 @@ public abstract class AbstractComponent<T extends ComponentContext<T>> {
 	/**
 	 * Bind key map.
 	 *
-	 * @param keyMap
+	 * @param keyMap the keymap
+	 * @param terminal the terminal
 	 */
-	protected abstract void bindKeyMap(KeyMap<String> keyMap);
+	protected abstract void bindKeyMap(KeyMap<String> keyMap, Terminal terminal);
 
 	/**
 	 * Enter into read loop. This should be called from a component.

@@ -23,7 +23,9 @@ import java.util.stream.Collectors;
 
 import org.jline.keymap.BindingReader;
 import org.jline.keymap.KeyMap;
+import org.jline.terminal.Attributes;
 import org.jline.terminal.Terminal;
+import org.jline.terminal.Attributes.ControlChar;
 import org.jline.utils.InfoCmp.Capability;
 
 import org.springframework.experimental.initializrcli.component.context.BaseComponentContext;
@@ -104,12 +106,14 @@ public abstract class AbstractSelectorComponent<T, C extends SelectorComponentCo
 	}
 
 	@Override
-	protected void bindKeyMap(KeyMap<String> keyMap) {
+	protected void bindKeyMap(KeyMap<String> keyMap, Terminal terminal) {
+		Attributes attr = terminal.getAttributes();
 		keyMap.bind(OPERATION_SELECT, " ");
 		keyMap.bind(OPERATION_DOWN, ctrl('E'), key(getTerminal(), Capability.key_down));
 		keyMap.bind(OPERATION_UP, ctrl('Y'), key(getTerminal(), Capability.key_up));
 		keyMap.bind(OPERATION_EXIT, "\r");
 		keyMap.bind(OPERATION_BACKSPACE, del());
+		keyMap.bind(OPERATION_BACKSPACE, Character.toString(attr.getControlChar(ControlChar.VERASE)));
 		// skip 32 - SPACE, 127 - DEL
 		for (char i = 33; i < KeyMap.KEYMAP_LENGTH - 1; i++) {
 			keyMap.bind(OPERATION_CHAR, Character.toString(i));

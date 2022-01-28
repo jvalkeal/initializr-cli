@@ -19,7 +19,9 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.jline.keymap.KeyMap;
+import org.jline.terminal.Attributes;
 import org.jline.terminal.Terminal;
+import org.jline.terminal.Attributes.ControlChar;
 import org.jline.utils.AttributedString;
 
 import org.springframework.experimental.initializrcli.component.context.BaseComponentContext;
@@ -52,9 +54,12 @@ public abstract class AbstractTextComponent<T, C extends TextComponentContext<T,
 	}
 
 	@Override
-	protected void bindKeyMap(KeyMap<String> keyMap) {
+	protected void bindKeyMap(KeyMap<String> keyMap, Terminal terminal) {
+		Attributes attr = terminal.getAttributes();
 		keyMap.bind(OPERATION_EXIT, "\r");
 		keyMap.bind(OPERATION_BACKSPACE, del());
+		keyMap.bind(OPERATION_BACKSPACE, Character.toString(attr.getControlChar(ControlChar.VERASE)));
+		// (char) attr.getControlChar(ControlChar.VERASE)
 		// skip 127 - DEL
 		for (char i = 32; i < KeyMap.KEYMAP_LENGTH - 1; i++) {
 			keyMap.bind(OPERATION_CHAR, Character.toString(i));
