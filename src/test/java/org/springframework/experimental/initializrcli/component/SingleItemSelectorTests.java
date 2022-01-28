@@ -158,6 +158,24 @@ public class SingleItemSelectorTests extends AbstractShellTests {
 		// assertThat(result.get().getItem().getData()).isEqualTo("data4");
 	}
 
+	@Test
+	public void testFilterShowsNoneThenSelect() throws InterruptedException {
+		scheduleSelect();
+
+		TestBuffer testBuffer = new TestBuffer().append("xxx").cr();
+		write(testBuffer.getBytes());
+
+		assertThat(awaitLatch(1)).isFalse();
+
+		testBuffer = new TestBuffer().backspace(3).cr();
+		write(testBuffer.getBytes());
+
+		assertThat(awaitLatch()).isTrue();
+
+		Optional<SelectorItem<SimplePojo>> selected = result.get();
+		assertThat(selected).isNotEmpty();
+	}
+
 	private void scheduleSelect() {
 		scheduleSelect(Arrays.asList(SELECTOR_ITEM_1, SELECTOR_ITEM_2, SELECTOR_ITEM_3,
 				SELECTOR_ITEM_4));
@@ -187,8 +205,12 @@ public class SingleItemSelectorTests extends AbstractShellTests {
 		});
 	}
 
-	private void awaitLatch() throws InterruptedException {
-		latch.await(4, TimeUnit.SECONDS);
+	private boolean awaitLatch() throws InterruptedException {
+		return awaitLatch(4);
+	}
+
+	private boolean awaitLatch(int seconds) throws InterruptedException {
+		return latch.await(seconds, TimeUnit.SECONDS);
 	}
 
 	private static class SimplePojo {

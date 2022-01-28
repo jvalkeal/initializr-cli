@@ -197,6 +197,10 @@ public abstract class AbstractSelectorComponent<T, C extends SelectorComponentCo
 				break;
 			case OPERATION_EXIT:
 				if (exitSelects) {
+					if (itemStateView.size() == 0) {
+						// filter shows nothing, prevent exit
+						break;
+					}
 					itemStateView.forEach(i -> {
 						if (i.index == start.get() + pos.get()) {
 							i.selected = !i.selected;

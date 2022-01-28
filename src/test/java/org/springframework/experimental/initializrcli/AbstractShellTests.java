@@ -31,6 +31,8 @@ import org.jline.utils.AttributedString;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
+import static org.jline.keymap.KeyMap.del;
+
 public abstract class AbstractShellTests {
 
     private ExecutorService executorService;
@@ -106,6 +108,18 @@ public abstract class AbstractShellTests {
 
         public TestBuffer cr() {
 			return append("\r");
+        }
+
+        public TestBuffer backspace() {
+            return append(del());
+        }
+
+        public TestBuffer backspace(int count) {
+            TestBuffer buf = this;
+            for (int i = 0; i < count; i++) {
+                buf = backspace();
+            }
+            return buf;
         }
 
 		public TestBuffer down() {
