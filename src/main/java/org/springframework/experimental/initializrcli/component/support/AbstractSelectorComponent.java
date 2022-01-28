@@ -112,8 +112,8 @@ public abstract class AbstractSelectorComponent<T, C extends SelectorComponentCo
 		keyMap.bind(OPERATION_DOWN, ctrl('E'), key(getTerminal(), Capability.key_down));
 		keyMap.bind(OPERATION_UP, ctrl('Y'), key(getTerminal(), Capability.key_up));
 		keyMap.bind(OPERATION_EXIT, "\r");
-		keyMap.bind(OPERATION_BACKSPACE, del());
-		keyMap.bind(OPERATION_BACKSPACE, Character.toString(attr.getControlChar(ControlChar.VERASE)));
+		keyMap.bind(OPERATION_BACKSPACE, del(), key(getTerminal(), Capability.key_backspace));
+		// keyMap.bind(OPERATION_BACKSPACE, Character.toString(attr.getControlChar(ControlChar.VERASE)));
 		// skip 32 - SPACE, 127 - DEL
 		for (char i = 33; i < KeyMap.KEYMAP_LENGTH - 1; i++) {
 			keyMap.bind(OPERATION_CHAR, Character.toString(i));
