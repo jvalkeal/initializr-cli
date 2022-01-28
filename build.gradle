@@ -30,10 +30,9 @@ configurations.all {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'org.springframework.shell:spring-shell-starter'
+	implementation 'org.springframework.shell:spring-shell-starter-jna'
 	implementation 'org.rauschig:jarchivelib'
 	implementation 'io.spring.initializr:initializr-generator'
-	implementation 'org.jline:jline-terminal-jna:3.21.0'
 	compileOnly 'org.springframework.experimental:spring-aot'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.awaitility:awaitility'
@@ -43,7 +42,7 @@ dependencies {
 dependencyManagement {
 	dependencies {
 		dependency "org.springframework.experimental:spring-aot:0.11.2"
-		dependency "org.springframework.shell:spring-shell-starter:${springShellVersion}"
+		dependency "org.springframework.shell:spring-shell-starter-jna:${springShellVersion}"
 		dependency "org.rauschig:jarchivelib:${jarchivelibVersion}"
 		dependency "com.google.jimfs:jimfs:${jimfsVersion}"
 	}
