@@ -18,15 +18,15 @@ package org.springframework.experimental.initializrcli.component;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.jline.keymap.BindingReader;
 import org.jline.keymap.KeyMap;
 import org.jline.terminal.Terminal;
 import org.jline.utils.AttributedString;
-import org.jline.utils.AttributedStringBuilder;
 
 import org.springframework.experimental.initializrcli.component.PathInput.PathInputContext;
 import org.springframework.experimental.initializrcli.component.context.ComponentContext;
@@ -54,7 +54,9 @@ public class PathInput extends AbstractTextComponent<Path, PathInputContext> {
 	}
 
 	public PathInput(Terminal terminal, String name, Function<PathInputContext, List<AttributedString>> renderer) {
-		super(terminal, name, renderer != null ? renderer : new DefaultRenderer());
+		super(terminal, name, null);
+		setRenderer(renderer != null ? renderer : new DefaultRenderer());
+		setTemplateLocation("classpath:org/springframework/shell/component/path-input-default.stg");
 	}
 
 	@Override
@@ -150,51 +152,21 @@ public class PathInput extends AbstractTextComponent<Path, PathInputContext> {
 
 	private static class DefaultPathInputContext extends BaseTextComponentContext<Path, PathInputContext>
 			implements PathInputContext {
+
+		@Override
+		public Map<String, Object> toTemplateModel() {
+			Map<String, Object> attributes = super.toTemplateModel();
+			Map<String, Object> model = new HashMap<>();
+			model.put("model", attributes);
+			return model;
+		}
 	}
 
-	private static class DefaultRenderer implements Function<PathInputContext, List<AttributedString>> {
+	private class DefaultRenderer implements Function<PathInputContext, List<AttributedString>> {
 
 		@Override
 		public List<AttributedString> apply(PathInputContext context) {
-			List<AttributedString> out = new ArrayList<>();
-			AttributedStringBuilder builder = new AttributedStringBuilder();
-			builder.append(context.getName());
-			builder.append(" ");
-
-			if (context.getResultValue() != null) {
-				builder.append(context.getResultValue().toString());
-			}
-			else  {
-				String input = context.getInput();
-				if (StringUtils.hasText(input)) {
-					builder.append(input);
-				}
-			}
-			out.add(builder.toAttributedString());
-
-			if (context.getResultValue() == null) {
-				builder = new AttributedStringBuilder();
-				if (StringUtils.hasText(context.getMessage())) {
-					builder.append(messagaLevelString(context.getMessageLevel()));
-					builder.append(" ");
-					builder.append(context.getMessage());
-					out.add(builder.toAttributedString());
-				}
-			}
-
-			return out;
-		}
-
-		private String messagaLevelString(MessageLevel level) {
-			if (level == MessageLevel.ERROR) {
-				return ">>>";
-			}
-			else if (level == MessageLevel.WARN) {
-				return ">>";
-			}
-			else {
-				return ">";
-			}
+			return renderTemplateResource(context.toTemplateModel());
 		}
 	}
 }

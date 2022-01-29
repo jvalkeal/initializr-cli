@@ -15,7 +15,9 @@
  */
 package org.springframework.experimental.initializrcli.component.context;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
@@ -56,5 +58,14 @@ public class BaseComponentContext<C extends ComponentContext<C>> extends LinkedH
 	@Override
 	public Stream<java.util.Map.Entry<Object, Object>> stream() {
 		return entrySet().stream();
+	}
+
+	@Override
+	public Map<String, Object> toTemplateModel() {
+		Map<String, Object> attributes = new HashMap<>();
+		// hardcoding enclosed map values into 'rawValues'
+		// as it may contain anything
+		attributes.put("rawValues", this);
+		return attributes;
 	}
 }

@@ -17,6 +17,7 @@ package org.springframework.experimental.initializrcli.component.support;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -442,6 +443,18 @@ public abstract class AbstractSelectorComponent<T, C extends SelectorComponentCo
 		public Integer getCursorRow() {
 			return cursorRow;
 		}
+
+		@Override
+		public java.util.Map<String,Object> toTemplateModel() {
+			Map<String, Object> attributes = super.toTemplateModel();
+			attributes.put("name", getName());
+			attributes.put("input", getInput());
+			attributes.put("itemStates", getItemStates());
+			attributes.put("itemStateView", getItemStateView());
+			attributes.put("isResult", isResult());
+			attributes.put("cursorRow", getCursorRow());
+			return attributes;
+		};
 
 		public void setCursorRow(Integer cursorRow) {
 			this.cursorRow = cursorRow;

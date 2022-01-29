@@ -15,15 +15,16 @@
  */
 package org.springframework.experimental.initializrcli.component;
 
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.jline.terminal.Terminal;
 import org.jline.utils.AttributedString;
-import org.jline.utils.AttributedStringBuilder;
 
 import org.springframework.experimental.initializrcli.component.context.ComponentContext;
 import org.springframework.experimental.initializrcli.component.support.AbstractSelectorComponent;
@@ -33,7 +34,6 @@ import org.springframework.experimental.initializrcli.component.support.Matchabl
 import org.springframework.experimental.initializrcli.component.support.Nameable;
 import org.springframework.experimental.initializrcli.component.support.AbstractSelectorComponent.SelectorComponentContext;
 import org.springframework.experimental.initializrcli.component.SingleItemSelector.SingleItemSelectorContext;
-import org.springframework.util.StringUtils;
 
 /**
  * Component able to pick single item.
@@ -48,6 +48,7 @@ public class SingleItemSelector<T, I extends Nameable & Matchable & Enableable &
 	public SingleItemSelector(Terminal terminal, List<I> items, String name, Comparator<I> comparator) {
 		super(terminal, name, items, true, comparator);
 		setRenderer(new DefaultRenderer());
+		setTemplateLocation("classpath:org/springframework/shell/component/single-item-selector-default.stg");
 	}
 
 	@Override
@@ -126,12 +127,37 @@ public class SingleItemSelector<T, I extends Nameable & Matchable & Enableable &
 
 		@Override
 		public Optional<I> getResultItem() {
+			if (getResultItems() == null) {
+				return Optional.empty();
+			}
 			return getResultItems().stream().findFirst();
 		}
 
 		@Override
 		public Optional<String> getValue() {
 			return getResultItem().map(item -> itemMapper.apply(item.getItem()));
+		}
+
+		@Override
+		public Map<String, Object> toTemplateModel() {
+			Map<String, Object> attributes = super.toTemplateModel();
+			getValue().ifPresent(value -> {
+				attributes.put("value", value);
+			});
+			List<Map<String, Object>> rows = getItemStateView().stream()
+				.map(is -> {
+					Map<String, Object> map = new HashMap<>();
+					map.put("name", is.getName());
+					map.put("selected", getCursorRow().intValue() == is.getIndex());
+					return map;
+				})
+				.collect(Collectors.toList());
+			attributes.put("rows", rows);
+			// finally wrap it into 'model' as that's what
+			// we expect in stg template.
+			Map<String, Object> model = new HashMap<>();
+			model.put("model", attributes);
+			return model;
 		}
 
 		@Override
@@ -144,35 +170,7 @@ public class SingleItemSelector<T, I extends Nameable & Matchable & Enableable &
 
 		@Override
 		public List<AttributedString> apply(SingleItemSelectorContext<T, I> context) {
-			List<AttributedString> out = new ArrayList<>();
-			AttributedStringBuilder titleBuilder = new AttributedStringBuilder();
-			titleBuilder.append(context.getName());
-			titleBuilder.append(" ");
-
-			if (context.isResult()) {
-				if (context.getResultItem().isPresent()) {
-					titleBuilder.append(context.getValue().orElse("<none>"));
-				}
-
-				out.add(titleBuilder.toAttributedString());
-			}
-			else {
-				String filterStr = StringUtils.hasText(context.getInput()) ? ", filtering '" + context.getInput() + "'" : ", type to filter";
-				titleBuilder.append(String.format("[Use arrows to move%s]", filterStr));
-				out.add(titleBuilder.toAttributedString());
-				context.getItemStateView().stream().forEach(e -> {
-					AttributedStringBuilder builder = new AttributedStringBuilder();
-					if (context.getCursorRow().intValue() == e.getIndex()) {
-						builder.append("> " + e.getName());
-					}
-					else {
-						builder.append("  " + e.getName());
-					}
-					out.add(builder.toAttributedString());
-				});
-			}
-
-			return out;
+			return renderTemplateResource(context.toTemplateModel());
 		}
 	}
 }

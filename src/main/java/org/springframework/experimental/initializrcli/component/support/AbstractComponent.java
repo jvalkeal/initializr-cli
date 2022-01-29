@@ -15,9 +15,15 @@
  */
 package org.springframework.experimental.initializrcli.component.support;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -33,8 +39,13 @@ import org.jline.utils.InfoCmp.Capability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.context.ResourceLoaderAware;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.experimental.initializrcli.component.context.ComponentContext;
+import org.springframework.shell.style.TemplateExecutor;
 import org.springframework.util.Assert;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -42,7 +53,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Janne Valkealahti
  */
-public abstract class AbstractComponent<T extends ComponentContext<T>> {
+public abstract class AbstractComponent<T extends ComponentContext<T>> implements ResourceLoaderAware {
 
 	private final static Logger log = LoggerFactory.getLogger(AbstractComponent.class);
 	public final static String OPERATION_EXIT = "EXIT";
@@ -59,11 +70,19 @@ public abstract class AbstractComponent<T extends ComponentContext<T>> {
 	private final List<Consumer<T>> postRunHandlers = new ArrayList<>();
 	private Function<T, List<AttributedString>> renderer;
 	private boolean printResults = true;
+	private String templateLocation;
+	private TemplateExecutor templateExecutor;
+	private ResourceLoader resourceLoader;
 
 	public AbstractComponent(Terminal terminal) {
 		Assert.notNull(terminal, "terminal must be set");
 		this.terminal = terminal;
 		this.bindingReader = new BindingReader(terminal.reader());
+	}
+
+	@Override
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
 	}
 
 	/**
@@ -138,6 +157,60 @@ public abstract class AbstractComponent<T extends ComponentContext<T>> {
 			printResults(context);
 		}
 		return run;
+	}
+
+	/**
+	 * Gets a template executor.
+	 *
+	 * @return a template executor
+	 */
+	public TemplateExecutor getTemplateExecutor() {
+		return templateExecutor;
+	}
+
+	/**
+	 * Sets a template executor.
+	 *
+	 * @param templateExecutor the template executor
+	 */
+	public void setTemplateExecutor(TemplateExecutor templateExecutor) {
+		this.templateExecutor = templateExecutor;
+	}
+
+	/**
+	 * Sets a template location.
+	 *
+	 * @param templateLocation the template location
+	 */
+	public void setTemplateLocation(String templateLocation) {
+		this.templateLocation = templateLocation;
+	}
+
+	/**
+	 * Render a given template with attributes.
+	 *
+	 * @param attributes the attributes
+	 * @return rendered content as attributed strings
+	 */
+	protected List<AttributedString> renderTemplateResource(Map<String, Object> attributes) {
+		String templateResource = resourceAsString(resourceLoader.getResource(templateLocation));
+		log.debug("Rendering template: {}", templateResource);
+		log.debug("Rendering template attributes: {}", attributes);
+		AttributedString rendered;
+		if (templateLocation.endsWith(".stg")) {
+			rendered = templateExecutor.renderGroup(templateResource, attributes);
+		}
+		else {
+			rendered = templateExecutor.render(templateResource, attributes);
+		}
+		log.debug("Template executor result: [{}]", rendered);
+		List<AttributedString> rows = rendered.columnSplitLength(Integer.MAX_VALUE);
+		// remove last if empty as columnsplit adds it
+		int lastIndex = rows.size() - 1;
+		if (lastIndex > 0 && rows.get(lastIndex).length() == 0) {
+			rows.remove(lastIndex);
+		}
+		return rows;
 	}
 
 	/**
@@ -240,6 +313,14 @@ public abstract class AbstractComponent<T extends ComponentContext<T>> {
 		if (StringUtils.hasText(out)) {
 			terminal.writer().println(out);
 			terminal.writer().flush();
+		}
+	}
+
+	private static String resourceAsString(Resource resource) {
+		try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)) {
+			return FileCopyUtils.copyToString(reader);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
 		}
 	}
 }

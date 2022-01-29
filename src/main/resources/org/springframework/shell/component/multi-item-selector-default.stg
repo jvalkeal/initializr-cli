@@ -1,0 +1,65 @@
+// used to select style if item is enabled/disabled
+enabled_style(flag) ::= <%
+<if(flag)>
+item-enabled
+<else>
+item-disabled
+<endif>
+%>
+
+// selector rows
+select_item(item) ::= <%
+<if(item.onrow)>
+<("> "); format="list-value">
+<else>
+<("  ")>
+<endif>
+<if(item.selected)>
+<("[x]"); format=enabled_style(item.enabled)> <item.name; format=enabled_style(item.enabled)>
+<else>
+<("[ ]"); format=enabled_style(item.enabled)> <item.name; format=enabled_style(item.enabled)>
+<endif>
+%>
+
+// start '? xxx' shows both running and result
+question_name(model) ::= <<
+<("?"); format="list-value"> <model.name; format="title">
+>>
+
+// within info section, dedicated instructions for user
+info_filter(model) ::= <%
+<if(model.input)>
+, filtering '<model.input>'
+<else>
+, type to filter
+<endif>
+%>
+
+// info section after '? xxx'
+info(model) ::= <<
+[Use arrows to move]<info_filter(model)>
+>>
+
+list_concat(values) ::= <%
+<values; separator=",">
+%>
+
+// component result
+result(model) ::= <<
+<question_name(model)> <(list_concat(model.values)); format="value">
+>>
+
+// <question_name(model)> <model.values; format="value", separator=",">
+// <question_name(model)> <model.values:{v|<v; format="value" separator=",">}>
+
+// component is running
+running(model) ::= <<
+<question_name(model)> <info(model)>
+<model.rows:{x|<select_item(x)>}; separator="\n">
+>>
+
+// main - hardcoded name
+// model - model built by SingleItemSelectorContext
+main(model) ::= <<
+<if(model.isResult)><result(model)><else><running(model)><endif>
+>>

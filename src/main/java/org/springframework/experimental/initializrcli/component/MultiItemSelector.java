@@ -15,15 +15,16 @@
  */
 package org.springframework.experimental.initializrcli.component;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.jline.terminal.Terminal;
 import org.jline.utils.AttributedString;
-import org.jline.utils.AttributedStringBuilder;
 
 import org.springframework.experimental.initializrcli.component.context.ComponentContext;
 import org.springframework.experimental.initializrcli.component.support.AbstractSelectorComponent;
@@ -32,7 +33,6 @@ import org.springframework.experimental.initializrcli.component.support.Itemable
 import org.springframework.experimental.initializrcli.component.support.Matchable;
 import org.springframework.experimental.initializrcli.component.support.Nameable;
 import org.springframework.experimental.initializrcli.component.support.AbstractSelectorComponent.SelectorComponentContext;
-import org.springframework.util.StringUtils;
 import org.springframework.experimental.initializrcli.component.MultiItemSelector.MultiItemSelectorContext;
 
 /**
@@ -48,6 +48,7 @@ public class MultiItemSelector<T, I extends Nameable & Matchable & Enableable & 
 	public MultiItemSelector(Terminal terminal, List<I> items, String name, Comparator<I> comparator) {
 		super(terminal, name, items, false, comparator);
 		setRenderer(new DefaultRenderer());
+		setTemplateLocation("classpath:org/springframework/shell/component/multi-item-selector-default.stg");
 	}
 
 	@Override
@@ -119,10 +120,35 @@ public class MultiItemSelector<T, I extends Nameable & Matchable & Enableable & 
 
 		@Override
 		public List<String> getValues() {
+			if (getResultItems() == null) {
+				return Collections.emptyList();
+			}
 			return getResultItems().stream()
 					.map(i -> i.getItem())
 					.map(i -> itemMapper.apply(i))
 					.collect(Collectors.toList());
+		}
+
+		@Override
+		public Map<String, Object> toTemplateModel() {
+			Map<String, Object> attributes = super.toTemplateModel();
+			attributes.put("values", getValues());
+			List<Map<String, Object>> rows = getItemStateView().stream()
+				.map(is -> {
+					Map<String, Object> map = new HashMap<>();
+					map.put("name", is.getName());
+					map.put("selected", is.isSelected());
+					map.put("onrow", getCursorRow().intValue() == is.getIndex());
+					map.put("enabled", is.isEnabled());
+					return map;
+				})
+				.collect(Collectors.toList());
+			attributes.put("rows", rows);
+			// finally wrap it into 'model' as that's what
+			// we expect in stg template.
+			Map<String, Object> model = new HashMap<>();
+			model.put("model", attributes);
+			return model;
 		}
 	}
 
@@ -130,44 +156,7 @@ public class MultiItemSelector<T, I extends Nameable & Matchable & Enableable & 
 
 		@Override
 		public List<AttributedString> apply(MultiItemSelectorContext<T, I> context) {
-			List<AttributedString> out = new ArrayList<>();
-			AttributedStringBuilder titleBuilder = new AttributedStringBuilder();
-			titleBuilder.append(context.getName());
-			titleBuilder.append(" ");
-
-			if (context.isResult()) {
-				titleBuilder.append(StringUtils.collectionToCommaDelimitedString(context.getValues()));
-				out.add(titleBuilder.toAttributedString());
-			}
-			else {
-				String filterStr = StringUtils.hasText(context.getInput()) ? ", filtering '" + context.getInput() + "'" : ", type to filter";
-				titleBuilder.append(String.format("[Use arrows to move%s]", filterStr));
-				out.add(titleBuilder.toAttributedString());
-				context.getItemStateView().stream().forEach(e -> {
-					AttributedStringBuilder builder = new AttributedStringBuilder();
-					if (context.getCursorRow().intValue() == e.getIndex()) {
-						builder.append("> ");
-					}
-					else {
-						builder.append("  ");
-					}
-					if (e.isSelected()) {
-						builder.append("[x]");
-					}
-					else {
-						if (e.isEnabled()) {
-							builder.append("[ ]");
-						}
-						else {
-							builder.append("   ");
-						}
-					}
-					builder.append(" " + e.getName());
-					out.add(builder.toAttributedString());
-				});
-			}
-
-			return out;
+			return renderTemplateResource(context.toTemplateModel());
 		}
 	}
 }

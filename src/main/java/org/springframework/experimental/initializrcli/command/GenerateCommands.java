@@ -17,29 +17,20 @@ package org.springframework.experimental.initializrcli.command;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.jline.utils.AttributedString;
-import org.jline.utils.AttributedStringBuilder;
-import org.jline.utils.AttributedStyle;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.experimental.initializrcli.client.model.Metadata;
-import org.springframework.experimental.initializrcli.component.MultiItemSelector.MultiItemSelectorContext;
-import org.springframework.experimental.initializrcli.component.PathInput.PathInputContext;
-import org.springframework.experimental.initializrcli.component.SingleItemSelector.SingleItemSelectorContext;
-import org.springframework.experimental.initializrcli.component.StringInput.StringInputContext;
 import org.springframework.experimental.initializrcli.component.context.ComponentContext;
 import org.springframework.experimental.initializrcli.component.support.SelectorItem;
-import org.springframework.experimental.initializrcli.component.support.AbstractTextComponent.TextComponentContext.MessageLevel;
 import org.springframework.experimental.initializrcli.support.InitializrUtils;
 import org.springframework.experimental.initializrcli.wizard.ComponentFlow;
 import org.springframework.experimental.initializrcli.wizard.ComponentFlow.ComponentFlowResult;
@@ -49,8 +40,8 @@ import org.springframework.experimental.initializrcli.wizard.Wizard;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.style.TemplateExecutor;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 @ShellComponent
 public class GenerateCommands extends AbstractInitializrCommands {
@@ -82,14 +73,10 @@ public class GenerateCommands extends AbstractInitializrCommands {
 	private final static String JAVA_VERSION_NAME = "Java";
 	private final static String JAVA_VERSION_ID = "javaVersion";
 
-	private final static StyledFieldInputRenderer FIELD_INPUT_RENDERER = new StyledFieldInputRenderer();
-	private final static StyledPathInputRenderer PATH_INPUT_RENDERER = new StyledPathInputRenderer();
-	private final static StyledSingleItemSelectorRenderer<String, SelectorItem<String>> SINGLE_ITEM_SELECTOR_RENDERER = new StyledSingleItemSelectorRenderer<>();
-	private final static StyledMultiItemSelectorRenderer<String, SelectorItem<String>> MULTI_ITEM_SELECTOR_RENDERER = new StyledMultiItemSelectorRenderer<>();
-
 	private final static Comparator<SelectorItem<String>> NAME_COMPARATOR = (o1, o2) -> {
 		return o1.getName().compareTo(o2.getName());
 	};
+
 	private final static Comparator<SelectorItem<String>> JAVA_VERSION_COMPARATOR = (o1, o2) -> {
 		try {
 			Integer oo1 = Integer.valueOf(o1.getName());
@@ -100,6 +87,11 @@ public class GenerateCommands extends AbstractInitializrCommands {
 		return NAME_COMPARATOR.compare(o1, o2);
 	};
 
+	@Autowired
+	private ResourceLoader resourceLoader;
+
+	@Autowired
+	private TemplateExecutor templateExecutor;
 
 	@ShellMethod(key = "init", value = "Initialize project")
 	public String init(
@@ -139,11 +131,12 @@ public class GenerateCommands extends AbstractInitializrCommands {
 				.collect(Collectors.toMap(v -> v.getName(), v -> v.getId()));
 
 		Wizard<ComponentFlowResult> wizard = ComponentFlow.builder(getTerminal())
+				.resourceLoader(resourceLoader)
+				.templateExecutor(templateExecutor)
 				.withPathInput(PATH_ID)
 					.name(PATH_NAME)
 					.resultValue(path)
 					.resultMode(ResultMode.ACCEPT)
-					.renderer(PATH_INPUT_RENDERER)
 					.and()
 				.withSingleItemSelector(PROJECT_ID)
 					.name(PROJECT_NAME)
@@ -151,7 +144,6 @@ public class GenerateCommands extends AbstractInitializrCommands {
 					.resultMode(ResultMode.ACCEPT)
 					.selectItems(projectSelectItems)
 					.sort(NAME_COMPARATOR)
-					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
 					.and()
 				.withSingleItemSelector(LANGUAGE_ID)
 					.name(LANGUAGE_NAME)
@@ -159,7 +151,6 @@ public class GenerateCommands extends AbstractInitializrCommands {
 					.resultMode(ResultMode.ACCEPT)
 					.selectItems(languageSelectItems)
 					.sort(NAME_COMPARATOR)
-					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
 					.and()
 				.withSingleItemSelector(BOOT_VERSION_ID)
 					.name(BOOT_VERSION_NAME)
@@ -167,49 +158,42 @@ public class GenerateCommands extends AbstractInitializrCommands {
 					.resultMode(ResultMode.ACCEPT)
 					.selectItems(bootSelectItems)
 					.sort(NAME_COMPARATOR.reversed())
-					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
 					.and()
 				.withStringInput(VERSION_ID)
 					.name(VERSION_NAME)
 					.defaultValue(defaultVersion)
 					.resultValue(version)
 					.resultMode(ResultMode.ACCEPT)
-					.renderer(FIELD_INPUT_RENDERER)
 					.and()
 				.withStringInput(GROUP_ID)
 					.name(GROUP_NAME)
 					.defaultValue(defaultGroupId)
 					.resultValue(group)
 					.resultMode(ResultMode.ACCEPT)
-					.renderer(FIELD_INPUT_RENDERER)
 					.and()
 				.withStringInput(ARTIFACT_ID)
 					.name(ARTIFACT_NAME)
 					.defaultValue(defaultArtifact)
 					.resultValue(artifact)
 					.resultMode(ResultMode.ACCEPT)
-					.renderer(FIELD_INPUT_RENDERER)
 					.and()
 				.withStringInput(NAME_ID)
 					.name(NAME_NAME)
 					.defaultValue(defaultName)
 					.resultValue(name)
 					.resultMode(ResultMode.ACCEPT)
-					.renderer(FIELD_INPUT_RENDERER)
 					.and()
 				.withStringInput(DESCRIPTION_ID)
 					.name(DESCRIPTION_NAME)
 					.defaultValue(defaultDescription)
 					.resultValue(description)
 					.resultMode(ResultMode.ACCEPT)
-					.renderer(FIELD_INPUT_RENDERER)
 					.and()
 				.withStringInput(PACKAGE_NAME_ID)
 					.name(PACKAGE_NAME_NAME)
 					.defaultValue(defaultPackageName)
 					.resultValue(packageName)
 					.resultMode(ResultMode.ACCEPT)
-					.renderer(FIELD_INPUT_RENDERER)
 					.and()
 				.withMultiItemSelector(DEPENDENCIES_ID)
 					.name(DEPENDENCIES_NAME)
@@ -227,7 +211,6 @@ public class GenerateCommands extends AbstractInitializrCommands {
 						context.setItems(selectorItems);
 					})
 					.sort(NAME_COMPARATOR)
-					.renderer(MULTI_ITEM_SELECTOR_RENDERER)
 					.max(7)
 					.and()
 				.withSingleItemSelector(PACKAGING_ID)
@@ -236,7 +219,6 @@ public class GenerateCommands extends AbstractInitializrCommands {
 					.resultMode(ResultMode.ACCEPT)
 					.selectItems(packagingSelectItems)
 					.sort(NAME_COMPARATOR)
-					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
 					.and()
 				.withSingleItemSelector(JAVA_VERSION_ID)
 					.name(JAVA_VERSION_NAME)
@@ -244,7 +226,6 @@ public class GenerateCommands extends AbstractInitializrCommands {
 					.resultMode(ResultMode.ACCEPT)
 					.selectItems(javaVersionSelectItems)
 					.sort(JAVA_VERSION_COMPARATOR)
-					.renderer(SINGLE_ITEM_SELECTOR_RENDERER)
 					.and()
 				.build();
 
@@ -278,169 +259,5 @@ public class GenerateCommands extends AbstractInitializrCommands {
 					generated.toFile().getAbsolutePath(), outFile.getAbsolutePath()), e);
 		}
 		return String.format("Extracted to %s", outFile.getAbsolutePath());
-	}
-
-	private static class StyledPathInputRenderer implements Function<PathInputContext, List<AttributedString>> {
-
-		@Override
-		public List<AttributedString> apply(PathInputContext context) {
-			List<AttributedString> out = new ArrayList<>();
-			AttributedStringBuilder builder = new AttributedStringBuilder();
-			builder.append("?", AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.GREEN).bold());
-			builder.append(" ");
-			builder.append(context.getName(), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.WHITE).bold());
-			builder.append(" ");
-
-			if (context.getResultValue() != null) {
-				builder.append(context.getResultValue().toString(), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
-			}
-			else  {
-				String input = context.getInput();
-				if (StringUtils.hasText(input)) {
-					builder.append(input);
-				}
-			}
-			out.add(builder.toAttributedString());
-
-			if (context.getResultValue() == null) {
-				builder = new AttributedStringBuilder();
-				if (StringUtils.hasText(context.getMessage())) {
-					appendMessage(builder, context.getMessage(), context.getMessageLevel());
-					out.add(builder.toAttributedString());
-				}
-			}
-
-			return out;
-		}
-
-		private static void appendMessage(AttributedStringBuilder builder, String message, MessageLevel level) {
-			if (!StringUtils.hasText(message)) {
-				return;
-			}
-			if (level == MessageLevel.ERROR) {
-				builder.append(">>> ", AttributedStyle.DEFAULT.foreground(AttributedStyle.RED));
-				builder.append(message, AttributedStyle.DEFAULT.foreground(AttributedStyle.RED));
-			}
-			else if (level == MessageLevel.WARN) {
-				builder.append(">> ", AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
-				builder.append(message, AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
-			}
-			else {
-				builder.append("> ", AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN));
-				builder.append(message, AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN));
-			}
-		}
-	}
-
-	private static class StyledFieldInputRenderer implements Function<StringInputContext, List<AttributedString>> {
-
-		@Override
-		public List<AttributedString> apply(StringInputContext context) {
-			AttributedStringBuilder builder = new AttributedStringBuilder();
-			builder.append("?", AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.GREEN).bold());
-			builder.append(" ");
-			builder.append(context.getName(), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.WHITE).bold());
-			builder.append(" ");
-
-			if (context.getResultValue() != null) {
-				builder.append(context.getResultValue(), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
-			}
-			else  {
-				String filter = context.getInput();
-				if (StringUtils.hasText(filter)) {
-					builder.append(filter);
-				}
-				else {
-					builder.append("[Default " + context.getDefaultValue() + "]",
-						AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
-				}
-			}
-
-			return Arrays.asList(builder.toAttributedString());
-		}
-	}
-
-	private static class StyledSingleItemSelectorRenderer<T, I extends SelectorItem<T>> implements
-			Function<SingleItemSelectorContext<T, I>, List<AttributedString>> {
-
-		@Override
-		public List<AttributedString> apply(SingleItemSelectorContext<T, I> context) {
-			List<AttributedString> out = new ArrayList<>();
-			AttributedStringBuilder titleBuilder = new AttributedStringBuilder();
-			titleBuilder.append("?", AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.GREEN).bold());
-			titleBuilder.append(" ");
-			titleBuilder.append(context.getName(), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.WHITE).bold());
-			titleBuilder.append(" ");
-
-			if (context.isResult()) {
-				if (context.getResultItem().isPresent()) {
-					titleBuilder.append(context.getValue().orElse("<none>"), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
-					out.add(titleBuilder.toAttributedString());
-				}
-			}
-			else {
-				String filterStr = StringUtils.hasText(context.getInput()) ? ", filtering '" + context.getInput() + "'" : ", type to filter";
-				titleBuilder.append(String.format("[Use arrows to move%s]", filterStr),
-						AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
-				out.add(titleBuilder.toAttributedString());
-				context.getItemStateView().stream().forEach(e -> {
-					AttributedStringBuilder builder = new AttributedStringBuilder();
-					if (context.getCursorRow().intValue() == e.getIndex()) {
-						builder.append("> " + e.getName(), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.CYAN).bold());
-					}
-					else {
-						builder.append("  " + e.getName());
-					}
-					out.add(builder.toAttributedString());
-				});
-			}
-
-			return out;
-		}
-	}
-
-	private static class StyledMultiItemSelectorRenderer<T, I extends SelectorItem<T>>
-			implements Function<MultiItemSelectorContext<T, I>, List<AttributedString>> {
-
-		@Override
-		public List<AttributedString> apply(MultiItemSelectorContext<T, I> context) {
-			List<AttributedString> out = new ArrayList<>();
-			AttributedStringBuilder titleBuilder = new AttributedStringBuilder();
-			titleBuilder.append("?", AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.GREEN).bold());
-			titleBuilder.append(" ");
-			titleBuilder.append(context.getName(), AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.WHITE).bold());
-			titleBuilder.append(" ");
-
-			if (context.isResult()) {
-				titleBuilder.append(StringUtils.collectionToCommaDelimitedString(context.getValues()),
-						AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
-				out.add(titleBuilder.toAttributedString());
-			}
-			else {
-				String filterStr = StringUtils.hasText(context.getInput()) ? ", filtering '" + context.getInput() + "'" : ", type to filter";
-				titleBuilder.append(String.format("[Use arrows to move%s]", filterStr),
-						AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.BLUE));
-				out.add(titleBuilder.toAttributedString());
-				context.getItemStateView().stream().forEach(e -> {
-					AttributedStringBuilder builder = new AttributedStringBuilder();
-					if (context.getCursorRow().intValue() == e.getIndex()) {
-						builder.append("> ", AttributedStyle.DEFAULT.foreground(AttributedStyle.BRIGHT + AttributedStyle.GREEN).bold());
-					}
-					else {
-						builder.append("  ");
-					}
-					if (e.isSelected()) {
-						builder.append("[x]", AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN));
-					}
-					else {
-						builder.append("[ ]", e.isEnabled() ? AttributedStyle.DEFAULT.bold() : AttributedStyle.DEFAULT.faint());
-					}
-					builder.append(" " + e.getName(), e.isEnabled() ? AttributedStyle.DEFAULT : AttributedStyle.DEFAULT.faint());
-					out.add(builder.toAttributedString());
-				});
-			}
-
-			return out;
-		}
 	}
 }

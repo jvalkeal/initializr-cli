@@ -71,4 +71,14 @@ public interface ComponentContext<C extends ComponentContext<C>> {
 	 * @return a {@link Stream} of key/value pairs held by this context
 	 */
 	Stream<Map.Entry<Object, Object>> stream();
+
+	/**
+	 * Gets context values as a map. Every context implementation can
+	 * do their own model as essentially what matter is a one coming
+	 * out from a last child which is one most likely to feed into
+	 * a template engine.
+	 *
+	 * @return map of context values
+	 */
+	Map<String, Object> toTemplateModel();
 }
