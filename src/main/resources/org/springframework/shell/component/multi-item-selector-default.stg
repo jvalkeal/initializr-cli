@@ -1,23 +1,24 @@
-// used to select style if item is enabled/disabled
-enabled_style(flag) ::= <%
-<if(flag)>
-item-enabled
-<else>
-item-disabled
-<endif>
+// used to select style if item is selected/unselected
+selected_style(flag) ::= <%
+<if(flag)>item-selected<else>item-unselected<endif>
 %>
 
 // selector rows
 select_item(item) ::= <%
 <if(item.onrow)>
-<("> "); format="list-value">
+  <("> "); format="item-selector">
 <else>
-<("  ")>
+  <("  ")>
 <endif>
-<if(item.selected)>
-<("[x]"); format=enabled_style(item.enabled)> <item.name; format=enabled_style(item.enabled)>
+
+<if(item.enabled)>
+  <if(item.selected)>
+    <("[x]"); format=selected_style(item.selected)> <item.name>
+  <else>
+    <("[ ]"); format=selected_style(item.selected)> <item.name>
+  <endif>
 <else>
-<("[ ]"); format=enabled_style(item.enabled)> <item.name; format=enabled_style(item.enabled)>
+  <("[ ]"); format="item-disabled"> <item.name; format="item-disabled">
 <endif>
 %>
 
@@ -40,17 +41,15 @@ info(model) ::= <<
 [Use arrows to move]<info_filter(model)>
 >>
 
-list_concat(values) ::= <%
+// get comma delited string
+comma_delimited(values) ::= <%
 <values; separator=",">
 %>
 
 // component result
 result(model) ::= <<
-<question_name(model)> <(list_concat(model.values)); format="value">
+<question_name(model)> <(comma_delimited(model.values)); format="value">
 >>
-
-// <question_name(model)> <model.values; format="value", separator=",">
-// <question_name(model)> <model.values:{v|<v; format="value" separator=",">}>
 
 // component is running
 running(model) ::= <<
@@ -59,7 +58,7 @@ running(model) ::= <<
 >>
 
 // main - hardcoded name
-// model - model built by SingleItemSelectorContext
+// model - model built by MultiItemSelectorContext
 main(model) ::= <<
 <if(model.isResult)><result(model)><else><running(model)><endif>
 >>

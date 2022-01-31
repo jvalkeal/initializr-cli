@@ -1,7 +1,7 @@
 // selector rows
 select_item(item) ::= <%
 <if(item.selected)>
-<("> "); format="list-value"><item.name; format="list-value">
+<("> "); format="item-selector"><item.name; format="item-selector">
 <else>
 <("  ")><item.name>
 <endif>
