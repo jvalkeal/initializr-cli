@@ -92,7 +92,7 @@ public class PathInput extends AbstractTextComponent<Path, PathInputContext> {
 			case OPERATION_BACKSPACE:
 				input = context.getInput();
 				if (StringUtils.hasLength(input)) {
-					input = input.substring(0, input.length() - 1);
+					input = input.length() > 1 ? input.substring(0, input.length() - 1) : null;
 				}
 				context.setInput(input);
 				checkPath(input, context);
@@ -128,6 +128,10 @@ public class PathInput extends AbstractTextComponent<Path, PathInputContext> {
 	}
 
 	private void checkPath(String path, PathInputContext context) {
+		if (!StringUtils.hasText(path)) {
+			context.setMessage(null);
+			return;
+		}
 		Path p = resolvePath(path);
 		boolean isDirectory = Files.isDirectory(p);
 		if (isDirectory) {

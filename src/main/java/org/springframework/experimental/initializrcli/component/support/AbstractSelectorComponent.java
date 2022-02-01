@@ -139,6 +139,7 @@ public abstract class AbstractSelectorComponent<T, C extends SelectorComponentCo
 		ItemStateViewProjection buildItemStateView = buildItemStateView(start.get(), thisContext);
 		List<ItemState<I>> itemStateView = buildItemStateView.items;
 		String operation = bindingReader.readBinding(keyMap);
+		String input;
 		switch (operation) {
 			case OPERATION_SELECT:
 				if (!exitSelects) {
@@ -178,23 +179,23 @@ public abstract class AbstractSelectorComponent<T, C extends SelectorComponentCo
 				break;
 			case OPERATION_CHAR:
 				String lastBinding = bindingReader.getLastBinding();
-				String input1 = thisContext.getInput();
-				if (input1 == null) {
-					input1 = lastBinding;
+				input = thisContext.getInput();
+				if (input == null) {
+					input = lastBinding;
 				}
 				else {
-					input1 = input1 + lastBinding;
+					input = input + lastBinding;
 				}
-				thisContext.setInput(input1);
+				thisContext.setInput(input);
 
 				stale = true;
 				break;
 			case OPERATION_BACKSPACE:
-				String input2 = thisContext.getInput();
-				if (StringUtils.hasLength(input2)) {
-					input2 = input2.substring(0, input2.length() - 1);
+				input = thisContext.getInput();
+				if (StringUtils.hasLength(input)) {
+					input = input.length() > 1 ? input.substring(0, input.length() - 1) : null;
 				}
-				thisContext.setInput(input2);
+				thisContext.setInput(input);
 				break;
 			case OPERATION_EXIT:
 				if (exitSelects) {
@@ -388,8 +389,8 @@ public abstract class AbstractSelectorComponent<T, C extends SelectorComponentCo
 
 		private String name;
 		private String input;
-		private List<ItemState<I>> itemStates;// = new ArrayList<>();
-		private List<ItemState<I>> itemStateView;// = new ArrayList<>();
+		private List<ItemState<I>> itemStates;
+		private List<ItemState<I>> itemStateView;
 		private Integer cursorRow;
 		private List<I> items;
 		private List<I> resultItems;

@@ -89,7 +89,7 @@ public class StringInput extends AbstractTextComponent<String, StringInputContex
 			case OPERATION_BACKSPACE:
 				input = context.getInput();
 				if (StringUtils.hasLength(input)) {
-					input = input.substring(0, input.length() - 1);
+					input = input.length() > 1 ? input.substring(0, input.length() - 1) : null;
 				}
 				context.setInput(input);
 				break;
