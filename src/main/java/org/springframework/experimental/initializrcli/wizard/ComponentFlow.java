@@ -153,6 +153,14 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 		StringInputSpec renderer(Function<StringInputContext, List<AttributedString>> renderer);
 
 		/**
+		 * Sets a default renderer template location.
+		 *
+		 * @param location the template location
+		 * @return a builder
+		 */
+		StringInputSpec template(String location);
+
+		/**
 		 * Adds a pre-run context handler.
 		 *
 		 * @param handler the context handler
@@ -334,6 +342,14 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 		SingleItemSelectorSpec renderer(Function<SingleItemSelectorContext<String, SelectorItem<String>>, List<AttributedString>> renderer);
 
 		/**
+		 * Sets a default renderer template location.
+		 *
+		 * @param location the template location
+		 * @return a builder
+		 */
+		SingleItemSelectorSpec template(String location);
+
+		/**
 		 * Sets a maximum number of items in a selector list;
 		 *
 		 * @param max the maximum number of items
@@ -426,6 +442,14 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 		 * @return a builder
 		 */
 		MultiItemSelectorSpec renderer(Function<MultiItemSelectorContext<String, SelectorItem<String>>, List<AttributedString>> renderer);
+
+		/**
+		 * Sets a default renderer template location.
+		 *
+		 * @param location the template location
+		 * @return a builder
+		 */
+		MultiItemSelectorSpec template(String location);
 
 		/**
 		 * Sets a maximum number of items in a selector list;
@@ -662,6 +686,7 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 		private List<Consumer<StringInputContext>> preHandlers = new ArrayList<>();
 		private List<Consumer<StringInputContext>> postHandlers = new ArrayList<>();
 		private boolean storeResult = true;
+		private String templateLocation;
 
 		public BaseStringInput(BaseBuilder builder, String id) {
 			super(builder, id);
@@ -694,6 +719,12 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 		@Override
 		public StringInputSpec renderer(Function<StringInputContext, List<AttributedString>> renderer) {
 			this.renderer = renderer;
+			return this;
+		}
+
+		@Override
+		public StringInputSpec template(String location) {
+			this.templateLocation = location;
 			return this;
 		}
 
@@ -739,6 +770,10 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 
 		public Function<StringInputContext, List<AttributedString>> getRenderer() {
 			return renderer;
+		}
+
+		public String getTemplateLocation() {
+			return templateLocation;
 		}
 
 		public List<Consumer<StringInputContext>> getPreHandlers() {
@@ -893,6 +928,7 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 		private List<Consumer<SingleItemSelectorContext<String, SelectorItem<String>>>> preHandlers = new ArrayList<>();
 		private List<Consumer<SingleItemSelectorContext<String, SelectorItem<String>>>> postHandlers = new ArrayList<>();
 		private boolean storeResult = true;
+		private String templateLocation;
 
 		public BaseSingleItemSelector(BaseBuilder builder, String id) {
 			super(builder, id);
@@ -937,6 +973,12 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 		@Override
 		public SingleItemSelectorSpec renderer(Function<SingleItemSelectorContext<String, SelectorItem<String>>, List<AttributedString>> renderer) {
 			this.renderer = renderer;
+			return this;
+		}
+
+		@Override
+		public SingleItemSelectorSpec template(String location) {
+			this.templateLocation = location;
 			return this;
 		}
 
@@ -992,6 +1034,10 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 
 		public Function<SingleItemSelectorContext<String, SelectorItem<String>>, List<AttributedString>> getRenderer() {
 			return renderer;
+		}
+
+		public String getTemplateLocation() {
+			return templateLocation;
 		}
 
 		public Integer getMaxItems() {
@@ -1073,6 +1119,7 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 		private List<Consumer<MultiItemSelectorContext<String, SelectorItem<String>>>> preHandlers = new ArrayList<>();
 		private List<Consumer<MultiItemSelectorContext<String, SelectorItem<String>>>> postHandlers = new ArrayList<>();
 		private boolean storeResult = true;
+		private String templateLocation;
 
 		public BaseMultiItemSelector(BaseBuilder builder, String id) {
 			super(builder, id);
@@ -1111,6 +1158,12 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 		@Override
 		public MultiItemSelectorSpec renderer(Function<MultiItemSelectorContext<String, SelectorItem<String>>, List<AttributedString>> renderer) {
 			this.renderer = renderer;
+			return this;
+		}
+
+		@Override
+		public MultiItemSelectorSpec template(String location) {
+			this.templateLocation = location;
 			return this;
 		}
 
@@ -1166,6 +1219,10 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 
 		public Function<MultiItemSelectorContext<String, SelectorItem<String>>, List<AttributedString>> getRenderer() {
 			return renderer;
+		}
+
+		public String getTemplateLocation() {
+			return templateLocation;
 		}
 
 		public Integer getMaxItems() {
@@ -1260,9 +1317,9 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 						StringInput selector = new StringInput(terminal, input.getName(), input.getDefaultValue());
 						selector.setResourceLoader(resourceLoader);
 						selector.setTemplateExecutor(templateExecutor);
-						// if (StringUtils.hasText(input.getTemplateLocation())) {
-						// 	selector.setTemplateLocation(input.getTemplateLocation());
-						// }
+						if (StringUtils.hasText(input.getTemplateLocation())) {
+							selector.setTemplateLocation(input.getTemplateLocation());
+						}
 						if (input.getRenderer() != null) {
 							selector.setRenderer(input.getRenderer());
 						}
@@ -1337,9 +1394,9 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 							selectorItems, input.getName(), input.getComparator());
 					selector.setResourceLoader(resourceLoader);
 					selector.setTemplateExecutor(templateExecutor);
-					// if (StringUtils.hasText(input.getTemplateLocation())) {
-					// 	selector.setTemplateLocation(input.getTemplateLocation());
-					// }
+					if (StringUtils.hasText(input.getTemplateLocation())) {
+						selector.setTemplateLocation(input.getTemplateLocation());
+					}
 					if (input.getRenderer() != null) {
 						selector.setRenderer(input.getRenderer());
 					}
@@ -1380,9 +1437,9 @@ public interface ComponentFlow extends Wizard<ComponentFlowResult> {
 							selectorItems, input.getName(), input.getComparator());
 					selector.setResourceLoader(resourceLoader);
 					selector.setTemplateExecutor(templateExecutor);
-					// if (StringUtils.hasText(input.getTemplateLocation())) {
-					// 	selector.setTemplateLocation(input.getTemplateLocation());
-					// }
+					if (StringUtils.hasText(input.getTemplateLocation())) {
+						selector.setTemplateLocation(input.getTemplateLocation());
+					}
 					if (input.getRenderer() != null) {
 						selector.setRenderer(input.getRenderer());
 					}

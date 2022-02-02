@@ -208,17 +208,11 @@ public class SingleItemSelectorTests extends AbstractShellTests {
 	}
 
 	private void scheduleSelect(List<SelectorItem<SimplePojo>> items, Integer maxItems) {
-		// SelectorItem<String> of1 = SelectorItem.of("name", "item");
-		// Itemable<String> of2 = SelectorItem.of("name", "item");
 		SingleItemSelector<SimplePojo, SelectorItem<SimplePojo>> selector = new SingleItemSelector<>(getTerminal(),
 				items, "testSimple", null);
 		selector.setResourceLoader(new DefaultResourceLoader());
 		selector.setTemplateExecutor(templateExecutor);
 
-		// SingleItemSelector<SimplePojo> selector = new SingleItemSelector<>(getTerminal(),
-		// 		items, "testSimple", null);
-		// new SingleItemSelector<SimplePojo, SelectorItem<SimplePojo>>(getTerminal(),items, "testSimple", null);
-		// new SingleItemSelector<SimplePojo, SelectorItem>(null, null, null, null);
 		selector.setPrintResults(true);
 		if (maxItems != null) {
 			selector.setMaxItems(maxItems);
