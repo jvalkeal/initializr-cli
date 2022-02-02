@@ -31,6 +31,14 @@ import org.jline.utils.AttributedString;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.shell.style.TemplateExecutor;
+import org.springframework.shell.style.Theme;
+import org.springframework.shell.style.ThemeRegistry;
+import org.springframework.shell.style.ThemeResolver;
+import org.springframework.shell.style.ThemeSettings;
+
 import static org.jline.keymap.KeyMap.del;
 
 public abstract class AbstractShellTests {
@@ -41,6 +49,8 @@ public abstract class AbstractShellTests {
     private LinkedBlockingQueue<byte[]> bytesQueue;
 	private ByteArrayOutputStream consoleOut;
 	private Terminal terminal;
+	private TemplateExecutor templateExecutor;
+    private ResourceLoader resourceLoader;
 
 	@BeforeEach
 	public void setup() throws Exception {
@@ -49,6 +59,23 @@ public abstract class AbstractShellTests {
 		pipedOutputStream = new PipedOutputStream();
 		bytesQueue = new LinkedBlockingQueue<>();
 		consoleOut = new ByteArrayOutputStream();
+
+		ThemeRegistry themeRegistry = new ThemeRegistry();
+		themeRegistry.register(new Theme() {
+			@Override
+			public String getName() {
+				return "default";
+			}
+
+			@Override
+			public ThemeSettings getSettings() {
+				return ThemeSettings.themeSettings();
+			}
+		});
+		ThemeResolver themeResolver = new ThemeResolver(themeRegistry, "default");
+		templateExecutor = new TemplateExecutor(themeResolver);
+
+        resourceLoader = new DefaultResourceLoader();
 
         pipedInputStream.connect(pipedOutputStream);
 		terminal = new DumbTerminal("terminal", "ansi", pipedInputStream, consoleOut, StandardCharsets.UTF_8);
@@ -63,7 +90,6 @@ public abstract class AbstractShellTests {
             } catch (Exception e) {
             }
         });
-
 	}
 
 	@AfterEach
@@ -82,6 +108,14 @@ public abstract class AbstractShellTests {
 	protected Terminal getTerminal() {
 		return terminal;
 	}
+
+    protected ResourceLoader getResourceLoader() {
+        return resourceLoader;
+    }
+
+    protected TemplateExecutor getTemplateExecutor() {
+        return templateExecutor;
+    }
 
     protected class TestBuffer {
         private final ByteArrayOutputStream out = new ByteArrayOutputStream();

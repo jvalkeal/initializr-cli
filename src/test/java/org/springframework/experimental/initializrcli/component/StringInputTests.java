@@ -25,9 +25,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.experimental.initializrcli.AbstractShellTests;
 import org.springframework.experimental.initializrcli.component.StringInput.StringInputContext;
 import org.springframework.experimental.initializrcli.component.context.ComponentContext;
+import org.springframework.shell.style.TemplateExecutor;
+import org.springframework.shell.style.Theme;
+import org.springframework.shell.style.ThemeRegistry;
+import org.springframework.shell.style.ThemeResolver;
+import org.springframework.shell.style.ThemeSettings;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,6 +44,7 @@ public class StringInputTests extends AbstractShellTests {
 	private CountDownLatch latch2;
 	private AtomicReference<StringInputContext> result1;
 	private AtomicReference<StringInputContext> result2;
+	private TemplateExecutor templateExecutor;
 
 	@BeforeEach
 	public void setupTests() {
@@ -46,6 +53,21 @@ public class StringInputTests extends AbstractShellTests {
 		latch2 = new CountDownLatch(1);
 		result1 = new AtomicReference<>();
 		result2 = new AtomicReference<>();
+
+		ThemeRegistry themeRegistry = new ThemeRegistry();
+		themeRegistry.register(new Theme() {
+			@Override
+			public String getName() {
+				return "default";
+			}
+
+			@Override
+			public ThemeSettings getSettings() {
+				return ThemeSettings.themeSettings();
+			}
+		});
+		ThemeResolver themeResolver = new ThemeResolver(themeRegistry, "default");
+		templateExecutor = new TemplateExecutor(themeResolver);
 	}
 
 	@AfterEach
@@ -65,6 +87,8 @@ public class StringInputTests extends AbstractShellTests {
 		ComponentContext<?> empty = ComponentContext.empty();
 		StringInput component1 = new StringInput(getTerminal(), "component1", "component1ResultValue");
 		component1.setPrintResults(true);
+		component1.setResourceLoader(new DefaultResourceLoader());
+		component1.setTemplateExecutor(templateExecutor);
 
 		service.execute(() -> {
 			StringInputContext run1Context = component1.run(empty);
@@ -87,6 +111,8 @@ public class StringInputTests extends AbstractShellTests {
 	public void testResultUserInput() throws InterruptedException {
 		ComponentContext<?> empty = ComponentContext.empty();
 		StringInput component1 = new StringInput(getTerminal(), "component1", "component1ResultValue");
+		component1.setResourceLoader(new DefaultResourceLoader());
+		component1.setTemplateExecutor(templateExecutor);
 
 		service.execute(() -> {
 			StringInputContext run1Context = component1.run(empty);
@@ -109,6 +135,10 @@ public class StringInputTests extends AbstractShellTests {
 		ComponentContext<?> empty = ComponentContext.empty();
 		StringInput component1 = new StringInput(getTerminal(), "component1", "component1ResultValue");
 		StringInput component2 = new StringInput(getTerminal(), "component2", "component2ResultValue");
+		component1.setResourceLoader(new DefaultResourceLoader());
+		component1.setTemplateExecutor(templateExecutor);
+		component2.setResourceLoader(new DefaultResourceLoader());
+		component2.setTemplateExecutor(templateExecutor);
 
 		component1.addPostRunHandler(context -> {
 			context.put("component1ResultValue", context.getResultValue());

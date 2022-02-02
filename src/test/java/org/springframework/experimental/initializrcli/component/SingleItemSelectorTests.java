@@ -30,9 +30,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.experimental.initializrcli.AbstractShellTests;
 import org.springframework.experimental.initializrcli.component.context.ComponentContext;
 import org.springframework.experimental.initializrcli.component.support.SelectorItem;
+import org.springframework.shell.style.TemplateExecutor;
+import org.springframework.shell.style.Theme;
+import org.springframework.shell.style.ThemeRegistry;
+import org.springframework.shell.style.ThemeResolver;
+import org.springframework.shell.style.ThemeSettings;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -56,12 +62,28 @@ public class SingleItemSelectorTests extends AbstractShellTests {
 	private ExecutorService service;
 	private CountDownLatch latch;
 	private AtomicReference<Optional<SelectorItem<SimplePojo>>> result;
+	private TemplateExecutor templateExecutor;
 
 	@BeforeEach
 	public void setupMulti() {
 		service = Executors.newFixedThreadPool(1);
 		latch = new CountDownLatch(1);
 		result = new AtomicReference<>();
+
+		ThemeRegistry themeRegistry = new ThemeRegistry();
+		themeRegistry.register(new Theme() {
+			@Override
+			public String getName() {
+				return "default";
+			}
+
+			@Override
+			public ThemeSettings getSettings() {
+				return ThemeSettings.themeSettings();
+			}
+		});
+		ThemeResolver themeResolver = new ThemeResolver(themeRegistry, "default");
+		templateExecutor = new TemplateExecutor(themeResolver);
 	}
 
 	@AfterEach
@@ -186,14 +208,11 @@ public class SingleItemSelectorTests extends AbstractShellTests {
 	}
 
 	private void scheduleSelect(List<SelectorItem<SimplePojo>> items, Integer maxItems) {
-		// SelectorItem<String> of1 = SelectorItem.of("name", "item");
-		// Itemable<String> of2 = SelectorItem.of("name", "item");
 		SingleItemSelector<SimplePojo, SelectorItem<SimplePojo>> selector = new SingleItemSelector<>(getTerminal(),
 				items, "testSimple", null);
-		// SingleItemSelector<SimplePojo> selector = new SingleItemSelector<>(getTerminal(),
-		// 		items, "testSimple", null);
-		// new SingleItemSelector<SimplePojo, SelectorItem<SimplePojo>>(getTerminal(),items, "testSimple", null);
-		// new SingleItemSelector<SimplePojo, SelectorItem>(null, null, null, null);
+		selector.setResourceLoader(new DefaultResourceLoader());
+		selector.setTemplateExecutor(templateExecutor);
+
 		selector.setPrintResults(true);
 		if (maxItems != null) {
 			selector.setMaxItems(maxItems);

@@ -45,6 +45,8 @@ public class ComponentFlowTests extends AbstractShellTests {
 		List<SelectItem> multi1SelectItems = Arrays.asList(SelectItem.of("key1", "value1"),
 				SelectItem.of("key2", "value2"), SelectItem.of("key3", "value3"));
 		ComponentFlow wizard = ComponentFlow.builder(getTerminal())
+				.resourceLoader(getResourceLoader())
+				.templateExecutor(getTemplateExecutor())
 				.withStringInput("field1")
 					.name("Field1")
 					.defaultValue("defaultField1Value")

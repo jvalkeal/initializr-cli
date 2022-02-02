@@ -31,9 +31,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.experimental.initializrcli.AbstractShellTests;
 import org.springframework.experimental.initializrcli.component.PathInput.PathInputContext;
 import org.springframework.experimental.initializrcli.component.context.ComponentContext;
+import org.springframework.shell.style.TemplateExecutor;
+import org.springframework.shell.style.Theme;
+import org.springframework.shell.style.ThemeRegistry;
+import org.springframework.shell.style.ThemeResolver;
+import org.springframework.shell.style.ThemeSettings;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,6 +50,7 @@ public class PathInputTests extends AbstractShellTests {
 	private AtomicReference<PathInputContext> result1;
 	private FileSystem fileSystem;
 	private Function<String, Path> pathProvider;
+	private TemplateExecutor templateExecutor;
 
 	@BeforeEach
 	public void setupTests() {
@@ -52,6 +59,21 @@ public class PathInputTests extends AbstractShellTests {
 		result1 = new AtomicReference<>();
 		fileSystem = Jimfs.newFileSystem();
 		pathProvider = (path) -> fileSystem.getPath(path);
+
+		ThemeRegistry themeRegistry = new ThemeRegistry();
+		themeRegistry.register(new Theme() {
+			@Override
+			public String getName() {
+				return "default";
+			}
+
+			@Override
+			public ThemeSettings getSettings() {
+				return ThemeSettings.themeSettings();
+			}
+		});
+		ThemeResolver themeResolver = new ThemeResolver(themeRegistry, "default");
+		templateExecutor = new TemplateExecutor(themeResolver);
 	}
 
 	@AfterEach
@@ -76,6 +98,8 @@ public class PathInputTests extends AbstractShellTests {
 		ComponentContext<?> empty = ComponentContext.empty();
 		PathInput component1 = new PathInput(getTerminal(), "component1");
 		component1.setPathProvider(pathProvider);
+		component1.setResourceLoader(new DefaultResourceLoader());
+		component1.setTemplateExecutor(templateExecutor);
 
 		service.execute(() -> {
 			PathInputContext run1Context = component1.run(empty);

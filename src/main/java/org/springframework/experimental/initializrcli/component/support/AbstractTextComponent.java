@@ -16,6 +16,7 @@
 package org.springframework.experimental.initializrcli.component.support;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.jline.keymap.KeyMap;
@@ -232,6 +233,19 @@ public abstract class AbstractTextComponent<T, C extends TextComponentContext<T,
 		public void setMessageLevel(MessageLevel messageLevel) {
 			this.messageLevel = messageLevel;
 		}
-	}
 
+		@Override
+		public Map<String, Object> toTemplateModel() {
+			Map<String, Object> attributes = super.toTemplateModel();
+			attributes.put("resultValue", getResultValue() != null ? getResultValue().toString() : null);
+			attributes.put("name", getName());
+			attributes.put("message", getMessage());
+			attributes.put("messageLevel", getMessageLevel());
+			attributes.put("hasMessageLevelInfo", getMessageLevel() == MessageLevel.INFO);
+			attributes.put("hasMessageLevelWarn", getMessageLevel() == MessageLevel.WARN);
+			attributes.put("hasMessageLevelError", getMessageLevel() == MessageLevel.ERROR);
+			attributes.put("input", getInput());
+			return attributes;
+		}
+	}
 }

@@ -15,15 +15,15 @@
  */
 package org.springframework.experimental.initializrcli.component;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.jline.keymap.BindingReader;
 import org.jline.keymap.KeyMap;
 import org.jline.terminal.Terminal;
 import org.jline.utils.AttributedString;
-import org.jline.utils.AttributedStringBuilder;
 
 import org.springframework.experimental.initializrcli.component.StringInput.StringInputContext;
 import org.springframework.experimental.initializrcli.component.context.ComponentContext;
@@ -51,7 +51,9 @@ public class StringInput extends AbstractTextComponent<String, StringInputContex
 
 	public StringInput(Terminal terminal, String name, String defaultValue,
 			Function<StringInputContext, List<AttributedString>> renderer) {
-		super(terminal, name, renderer != null ? renderer : new DefaultRenderer());
+		super(terminal, name, null);
+		setRenderer(renderer != null ? renderer : new DefaultRenderer());
+		setTemplateLocation("classpath:org/springframework/shell/component/string-input-default.stg");
 		this.defaultValue = defaultValue;
 	}
 
@@ -87,7 +89,7 @@ public class StringInput extends AbstractTextComponent<String, StringInputContex
 			case OPERATION_BACKSPACE:
 				input = context.getInput();
 				if (StringUtils.hasLength(input)) {
-					input = input.substring(0, input.length() - 1);
+					input = input.length() > 1 ? input.substring(0, input.length() - 1) : null;
 				}
 				context.setInput(input);
 				break;
@@ -159,30 +161,21 @@ public class StringInput extends AbstractTextComponent<String, StringInputContex
 			this.defaultValue = defaultValue;
 		}
 
+		@Override
+		public Map<String, Object> toTemplateModel() {
+			Map<String, Object> attributes = super.toTemplateModel();
+			attributes.put("defaultValue", getDefaultValue() != null ? getDefaultValue() : null);
+			Map<String, Object> model = new HashMap<>();
+			model.put("model", attributes);
+			return model;
+		}
 	}
 
-	private static class DefaultRenderer implements Function<StringInputContext, List<AttributedString>> {
+	private class DefaultRenderer implements Function<StringInputContext, List<AttributedString>> {
 
 		@Override
 		public List<AttributedString> apply(StringInputContext context) {
-			AttributedStringBuilder builder = new AttributedStringBuilder();
-			builder.append(context.getName());
-			builder.append(" ");
-
-			if (context.getResultValue() != null) {
-				builder.append(context.getResultValue());
-			}
-			else  {
-				String input = context.getInput();
-				if (StringUtils.hasText(input)) {
-					builder.append(input);
-				}
-				else {
-					builder.append("[Default " + context.getDefaultValue() + "]");
-				}
-			}
-
-			return Arrays.asList(builder.toAttributedString());
+			return renderTemplateResource(context.toTemplateModel());
 		}
 	}
 }

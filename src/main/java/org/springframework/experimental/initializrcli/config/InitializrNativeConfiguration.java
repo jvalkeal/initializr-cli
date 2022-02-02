@@ -59,6 +59,7 @@ import org.springframework.nativex.type.NativeConfiguration;
 		patterns = {
 			"completion/.*",
 			"template/.*.st",
+			"org/springframework/shell/component/.*.stg",
 			"com/sun/jna/win32-x86-64/jnidispatch.dll"
 		}),
 	types = {

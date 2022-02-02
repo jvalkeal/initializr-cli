@@ -29,9 +29,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.experimental.initializrcli.AbstractShellTests;
 import org.springframework.experimental.initializrcli.component.context.ComponentContext;
 import org.springframework.experimental.initializrcli.component.support.SelectorItem;
+import org.springframework.shell.style.TemplateExecutor;
+import org.springframework.shell.style.Theme;
+import org.springframework.shell.style.ThemeRegistry;
+import org.springframework.shell.style.ThemeResolver;
+import org.springframework.shell.style.ThemeSettings;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -57,12 +63,28 @@ public class MultiItemSelectorTests extends AbstractShellTests {
 	private ExecutorService service;
 	private CountDownLatch latch;
 	private AtomicReference<List<SelectorItem<SimplePojo>>> result;
+	private TemplateExecutor templateExecutor;
 
 	@BeforeEach
 	public void setupMulti() {
 		service = Executors.newFixedThreadPool(1);
 		latch = new CountDownLatch(1);
 		result = new AtomicReference<>();
+
+		ThemeRegistry themeRegistry = new ThemeRegistry();
+		themeRegistry.register(new Theme() {
+			@Override
+			public String getName() {
+				return "default";
+			}
+
+			@Override
+			public ThemeSettings getSettings() {
+				return ThemeSettings.themeSettings();
+			}
+		});
+		ThemeResolver themeResolver = new ThemeResolver(themeRegistry, "default");
+		templateExecutor = new TemplateExecutor(themeResolver);
 	}
 
 	@AfterEach
@@ -96,7 +118,7 @@ public class MultiItemSelectorTests extends AbstractShellTests {
 	public void testItemsShownWithDisabled() {
 		scheduleSelect(Arrays.asList(SELECTOR_ITEM_1, SELECTOR_ITEM_7));
 		await().atMost(Duration.ofSeconds(4))
-				.untilAsserted(() -> assertStringOrderThat(consoleOut()).containsInOrder("[ ] simplePojo1", "    simplePojo7"));
+				.untilAsserted(() -> assertStringOrderThat(consoleOut()).containsInOrder("[ ] simplePojo1", "[ ] simplePojo7"));
 	}
 
 	@Test
@@ -197,10 +219,11 @@ public class MultiItemSelectorTests extends AbstractShellTests {
 	}
 
 	private void scheduleSelect(List<SelectorItem<SimplePojo>> items, Integer maxItems) {
-		// SelectorItem<String> of1 = SelectorItem.of("name", "item");
-		// SelectorItem<SimplePojo> of2 = SelectorItem.of("name", new SimplePojo("data"));
 		MultiItemSelector<SimplePojo, SelectorItem<SimplePojo>> selector = new MultiItemSelector<>(getTerminal(),
 				items, "testSimple", null);
+		selector.setResourceLoader(new DefaultResourceLoader());
+		selector.setTemplateExecutor(templateExecutor);
+
 		selector.setPrintResults(true);
 		if (maxItems != null) {
 			selector.setMaxItems(maxItems);
