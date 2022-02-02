@@ -209,7 +209,7 @@ public abstract class AbstractSelectorComponent<T, C extends SelectorComponentCo
 						}
 					});
 				}
-				List<I> values = thisContext.getItemStateView().stream()
+				List<I> values = thisContext.getItemStates().stream()
 						.filter(i -> i.selected)
 						.map(i -> i.item)
 						.collect(Collectors.toList());
