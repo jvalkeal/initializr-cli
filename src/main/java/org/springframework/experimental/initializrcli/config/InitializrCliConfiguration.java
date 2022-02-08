@@ -41,12 +41,12 @@ public class InitializrCliConfiguration {
         return factory;
     }
 
-	@Bean
-	ReactorNettyHttpClientMapper reactorNettyHttpClientMapper() {
-        // workaround for native/graal issue
-        // https://github.com/spring-projects-experimental/spring-native/issues/1319
-		return httpClient -> httpClient.resolver(DefaultAddressResolverGroup.INSTANCE);
-	}
+	// @Bean
+	// ReactorNettyHttpClientMapper reactorNettyHttpClientMapper() {
+    //     // workaround for native/graal issue
+    //     // https://github.com/spring-projects-experimental/spring-native/issues/1319
+	// 	return httpClient -> httpClient.resolver(DefaultAddressResolverGroup.INSTANCE);
+	// }
 
     @Bean
     public ApplicationRunner initializeConnectionApplicationRunner(TargetHolder targetHolder,
