@@ -14,12 +14,12 @@ logging:
   pattern:
     console:
 ## log debug from a cli
-#  file:
-#    name: shell.log
-#  level:
-#    root: debug
-#    org:
-#      springframework:
-#        experimental:
-#          initializrcli: debug
-#        shell: debug
+  file:
+    name: shell.log
+  level:
+    root: debug
+    org:
+      springframework:
+        experimental:
+          initializrcli: debug
+        shell: debug

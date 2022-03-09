@@ -53,6 +53,9 @@ jobs:
           components: native-image
           set-java-home: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
       - run: ./gradlew build nativeCompile --no-daemon
       - uses: actions/upload-artifact@v2
         with:
@@ -67,3 +70,9 @@ jobs:
         run: |
           build/native/nativeCompile/initializr-cli.exe version
         if: runner.os == 'Windows'
+      - name: e2e (linux/macos)
+        working-directory: e2e
+        run: |
+          npm install
+          npm test
+        if: runner.os != 'Windows'
