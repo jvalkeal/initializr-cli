@@ -25,10 +25,12 @@ describe('initializr interactive', () => {
 
   it('create maven project', async () => {
     const demoDir = path.join(tempDir, 'demo');
+    const demoDirWin = demoDir.replace(/\\/g, '\\\\');
     const isWindows = os.platform() === 'win32';
     const command = isWindows ? '..\\build\\native\\nativeCompile\\initializr-cli.exe' : '../build/native/nativeCompile/initializr-cli';
     const commandx = path.resolve(command);
     console.log('demoDir', demoDir);
+    console.log('demoDirWin', demoDirWin);
     console.log('iswin', isWindows);
     console.log('origpath', command);
     console.log('fullpath', commandx);
@@ -36,7 +38,7 @@ describe('initializr interactive', () => {
       command: commandx,
       options: [
         'init',
-        `--path ${demoDir}`,
+        `--path ${demoDirWin}`,
         '--language java',
         '--boot-version 2.6.4',
         '--version 0.0.1-SNAPSHOT',
