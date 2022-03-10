@@ -28,6 +28,7 @@ describe('initializr interactive', () => {
     const isWindows = os.platform() === 'win32';
     const command = isWindows ? '..\\build\\native\\nativeCompile\\initializr-cli.exe' : '../build/native/nativeCompile/initializr-cli';
     const commandx = path.resolve(command);
+    console.log('demoDir', demoDir);
     console.log('iswin', isWindows);
     console.log('origpath', command);
     console.log('fullpath', commandx);
@@ -63,7 +64,10 @@ describe('initializr interactive', () => {
     console.log(cli.lines());
     cli.dispose();
     const buildFile = path.join(demoDir, 'pom.xml');
-    expect(fs.existsSync(buildFile)).toBe(true);
+    console.log('buildfile', buildFile);
+    const buildFileFull = path.resolve(buildFile);
+    console.log('buildfilefull', buildFileFull);
+    expect(fs.existsSync(buildFileFull)).toBe(true);
   });
 
 });
