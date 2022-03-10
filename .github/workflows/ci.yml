@@ -70,9 +70,8 @@ jobs:
         run: |
           build/native/nativeCompile/initializr-cli.exe version
         if: runner.os == 'Windows'
-      - name: e2e (linux/macos)
+      - name: e2e
         working-directory: e2e
         run: |
           npm install
           npm test
-        if: runner.os != 'Windows'
