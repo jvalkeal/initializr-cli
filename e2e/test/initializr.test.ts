@@ -27,8 +27,12 @@ describe('initializr interactive', () => {
     const demoDir = path.join(tempDir, 'demo');
     const isWindows = os.platform() === 'win32';
     const command = isWindows ? '..\\build\\native\\nativeCompile\\initializr-cli.exe' : '../build/native/nativeCompile/initializr-cli';
+    const commandx = path.resolve(command);
+    console.log('iswin', isWindows);
+    console.log('origpath', command);
+    console.log('fullpath', commandx);
     const cli = new Cli({
-      command: command,
+      command: commandx,
       options: [
         'init',
         `--path ${demoDir}`,
