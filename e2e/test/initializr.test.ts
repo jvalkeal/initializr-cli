@@ -26,7 +26,7 @@ describe('initializr interactive', () => {
   it('create maven project', async () => {
     const demoDir = path.join(tempDir, 'demo');
     const isWindows = os.platform() === 'win32';
-    const command = isWindows ? '../build/native/nativeCompile/initializr-cli.exe' : '../build/native/nativeCompile/initializr-cli';
+    const command = isWindows ? '..\build\native\nativeCompile\initializr-cli.exe' : '../build/native/nativeCompile/initializr-cli';
     const cli = new Cli({
       command: command,
       options: [
