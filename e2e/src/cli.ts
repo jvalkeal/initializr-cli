@@ -1,28 +1,44 @@
 import * as pty from 'node-pty';
-import { Terminal, IDisposable } from 'xterm-headless';
+import { Terminal } from 'xterm-headless';
 import { sleep } from './utils';
 
 export interface CliOptions {
   command: string;
   options?: string[];
+  keyWait?: number;
+  cols?: number;
+  rows?: number;
 }
 
 export class Cli {
   private isDisposed: boolean = false;
   private pty: pty.IPty | undefined;
   private term: Terminal | undefined;
+  private keyWait: number = 500;
+  private cols: number = 80;
+  private rows: number = 20;
 
-  constructor(private options: CliOptions) {}
+  constructor(private options: CliOptions) {
+    if (options.keyWait) {
+      this.keyWait = options.keyWait;
+    }
+    if (options.cols) {
+      this.cols = options.cols;
+    }
+    if (options.rows) {
+      this.rows = options.rows;
+    }
+  }
 
   public run(): void {
     this.pty = pty.spawn(this.options.command, this.options.options || [], {
       name: 'xterm-256color',
-      cols: 80,
-      rows: 30,
+      cols: this.cols,
+      rows: this.rows,
     });
     this.term = new Terminal({
-      cols: 80,
-      rows: 30,
+      cols: this.cols,
+      rows: this.rows,
     });
     this.pty.onData(data => {
       console.log(data);
@@ -42,36 +58,27 @@ export class Cli {
     return ret;
   }
 
-  public text(data: string): Cli {
+  public async keyText(data: string, wait: number): Promise<Cli> {
+    this.pty?.write(data);
+    await this.doWait(wait);
     return this;
   }
 
-  public keyUp(): Cli {
+  public async keyUp(wait?: number): Promise<Cli> {
     this.pty?.write('\x1BOA');
+    await this.doWait(wait);
     return this;
   }
 
-  // public keyDown(): Cli {
-  //   this.pty?.write('\x1BOB');
-  //   return this;
-  // }
-
-  // public enter(): Cli {
-  //   this.pty?.write('\x0D');
-  //   return this;
-  // }
-
-  public async keyDown(wait: number = 200): Promise<Cli> {
+  public async keyDown(wait?: number): Promise<Cli> {
     this.pty?.write('\x1BOB');
-    // await this.writeSync('\x1BOB');
-    await sleep(wait);
+    await this.doWait(wait);
     return this;
   }
 
-  public async enter(wait: number = 200): Promise<Cli> {
+  public async keyEnter(wait?: number): Promise<Cli> {
     this.pty?.write('\x0D');
-    // await this.writeSync('\x0D');
-    await sleep(wait);
+    await this.doWait(wait);
     return this;
   }
 
@@ -84,7 +91,7 @@ export class Cli {
     this.isDisposed = true;
   }
 
-  // private writeSync(text: string): Promise<void> {
-  //   return new Promise<void>(r => this.pty?.write(text, r));
-  // }
+  private async doWait(wait?: number): Promise<void> {
+    await sleep(wait || this.keyWait);
+  }
 }

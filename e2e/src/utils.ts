@@ -1,7 +1,12 @@
+import * as os from 'os';
 import * as path from 'path';
 import { Readable } from 'stream';
 
 export const tempDir = path.join(__dirname, 'springup', 'temp');
+export const isWindows = os.platform() === 'win32';
+export const cliPath = isWindows
+  ? '../build/native/nativeCompile/initializr-cli.exe'
+  : '../build/native/nativeCompile/initializr-cli';
 
 export const KEYS = {
   up: '\x1B\x5B\x41',
@@ -10,7 +15,7 @@ export const KEYS = {
   downxx: '\u001B[1B',
   enter: '\x0D',
   space: '\x20'
-}
+};
 
 export const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
@@ -24,12 +29,12 @@ export function sendKeystrokes(stdin: Readable, keys: Array<Array<string>>) {
   return async () => {
     keys.forEach(async outer => {
       outer.forEach(inner => {
-        console.log("sending", inner);
+        console.log('sending', inner);
         stdin.push(inner);
       });
-      console.log("sleep1");
+      console.log('sleep1');
       await sleep(1000);
-      console.log("sleep2");
+      console.log('sleep2');
     });
   };
 }
@@ -37,12 +42,12 @@ export function sendKeystrokes(stdin: Readable, keys: Array<Array<string>>) {
 export async function sendKeystrokesx(stdin: Readable, keys: Array<Array<string>>): Promise<void> {
   for (let outer of keys) {
     for (let inner of outer) {
-      console.log("sending1", inner);
+      console.log('sending1', inner);
       stdin.push(inner);
-      console.log("sending2", inner.length);
+      console.log('sending2', inner.length);
     }
-    console.log("sleep1");
+    console.log('sleep1');
     await sleep(1000);
-    console.log("sleep2");
+    console.log('sleep2');
   }
 }
